@@ -14,16 +14,262 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analises_ia: {
+        Row: {
+          cliente_id: string | null
+          created_at: string
+          id: string
+          prompt_enviado: string
+          resposta_ia: string
+          sugestoes_geradas: Json | null
+          tipo_analise: Database["public"]["Enums"]["tipo_analise"]
+          vendedor_id: string
+        }
+        Insert: {
+          cliente_id?: string | null
+          created_at?: string
+          id?: string
+          prompt_enviado: string
+          resposta_ia: string
+          sugestoes_geradas?: Json | null
+          tipo_analise: Database["public"]["Enums"]["tipo_analise"]
+          vendedor_id: string
+        }
+        Update: {
+          cliente_id?: string | null
+          created_at?: string
+          id?: string
+          prompt_enviado?: string
+          resposta_ia?: string
+          sugestoes_geradas?: Json | null
+          tipo_analise?: Database["public"]["Enums"]["tipo_analise"]
+          vendedor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analises_ia_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clientes: {
+        Row: {
+          cnpj: string
+          contato: string | null
+          created_at: string
+          data_cadastro: string
+          id: string
+          nome: string
+          ticket_medio: number | null
+          tipo: Database["public"]["Enums"]["tipo_cliente"]
+          ultima_compra: string | null
+          vendedor_id: string
+        }
+        Insert: {
+          cnpj: string
+          contato?: string | null
+          created_at?: string
+          data_cadastro?: string
+          id?: string
+          nome: string
+          ticket_medio?: number | null
+          tipo: Database["public"]["Enums"]["tipo_cliente"]
+          ultima_compra?: string | null
+          vendedor_id: string
+        }
+        Update: {
+          cnpj?: string
+          contato?: string | null
+          created_at?: string
+          data_cadastro?: string
+          id?: string
+          nome?: string
+          ticket_medio?: number | null
+          tipo?: Database["public"]["Enums"]["tipo_cliente"]
+          ultima_compra?: string | null
+          vendedor_id?: string
+        }
+        Relationships: []
+      }
+      itens_pedido: {
+        Row: {
+          created_at: string
+          id: string
+          pedido_id: string
+          preco_unitario: number
+          produto_id: string
+          quantidade: number
+          subtotal: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pedido_id: string
+          preco_unitario: number
+          produto_id: string
+          quantidade: number
+          subtotal: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pedido_id?: string
+          preco_unitario?: number
+          produto_id?: string
+          quantidade?: number
+          subtotal?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "itens_pedido_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itens_pedido_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pedidos: {
+        Row: {
+          cliente_id: string
+          created_at: string
+          data_pedido: string
+          id: string
+          status: Database["public"]["Enums"]["status_pedido"] | null
+          valor_total: number
+          vendedor_id: string
+        }
+        Insert: {
+          cliente_id: string
+          created_at?: string
+          data_pedido?: string
+          id?: string
+          status?: Database["public"]["Enums"]["status_pedido"] | null
+          valor_total: number
+          vendedor_id: string
+        }
+        Update: {
+          cliente_id?: string
+          created_at?: string
+          data_pedido?: string
+          id?: string
+          status?: Database["public"]["Enums"]["status_pedido"] | null
+          valor_total?: number
+          vendedor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedidos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      produtos: {
+        Row: {
+          categoria: string
+          created_at: string
+          em_promocao: boolean | null
+          id: string
+          nome: string
+          preco_anterior: number
+          preco_atual: number
+          unidade: string
+        }
+        Insert: {
+          categoria: string
+          created_at?: string
+          em_promocao?: boolean | null
+          id?: string
+          nome: string
+          preco_anterior: number
+          preco_atual: number
+          unidade: string
+        }
+        Update: {
+          categoria?: string
+          created_at?: string
+          em_promocao?: boolean | null
+          id?: string
+          nome?: string
+          preco_anterior?: number
+          preco_atual?: number
+          unidade?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "vendedor" | "admin"
+      status_pedido: "concluido" | "pendente" | "cancelado"
+      tipo_analise: "geral" | "individual"
+      tipo_cliente:
+        | "supermercado"
+        | "mercado"
+        | "padaria"
+        | "confeitaria"
+        | "lanchonete"
+        | "restaurante"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +396,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["vendedor", "admin"],
+      status_pedido: ["concluido", "pendente", "cancelado"],
+      tipo_analise: ["geral", "individual"],
+      tipo_cliente: [
+        "supermercado",
+        "mercado",
+        "padaria",
+        "confeitaria",
+        "lanchonete",
+        "restaurante",
+      ],
+    },
   },
 } as const
