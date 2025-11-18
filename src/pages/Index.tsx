@@ -5,7 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogOut, TrendingUp, Users, DollarSign, Target, Sparkles, UserSearch } from "lucide-react";
+import { toast } from "sonner";
 import logo from "@/assets/mutuamilk-logo.png";
+import { AnaliseDialog } from "@/components/AnaliseDialog";
+import { ClienteSelectorDialog } from "@/components/ClienteSelectorDialog";
 
 export default function Index() {
   const { user, isLoading, userRole, signOut } = useAuth();
@@ -18,6 +21,12 @@ export default function Index() {
     ticketMedio: 0,
   });
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
+  const [analiseGeralOpen, setAnaliseGeralOpen] = useState(false);
+  const [analiseIndividualOpen, setAnaliseIndividualOpen] = useState(false);
+  const [clienteSelectorOpen, setClienteSelectorOpen] = useState(false);
+  const [analiseGeral, setAnaliseGeral] = useState<string | null>(null);
+  const [analiseIndividual, setAnaliseIndividual] = useState<string | null>(null);
+  const [isLoadingAnalise, setIsLoadingAnalise] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -85,6 +94,56 @@ export default function Index() {
       console.error("Erro ao carregar métricas:", error);
     } finally {
       setIsLoadingMetrics(false);
+    }
+  };
+
+  const handleAnaliseGeral = async () => {
+    if (!user) return;
+    
+    setAnaliseGeralOpen(true);
+    setIsLoadingAnalise(true);
+    setAnaliseGeral(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('analise-geral', {
+        body: {}
+      });
+
+      if (error) throw error;
+
+      setAnaliseGeral(data.analise);
+      toast.success("Análise gerada com sucesso!");
+    } catch (error: any) {
+      console.error("Erro ao gerar análise:", error);
+      toast.error(error.message || "Erro ao gerar análise");
+      setAnaliseGeralOpen(false);
+    } finally {
+      setIsLoadingAnalise(false);
+    }
+  };
+
+  const handleAnaliseIndividual = async (clienteId: string) => {
+    if (!user) return;
+    
+    setAnaliseIndividualOpen(true);
+    setIsLoadingAnalise(true);
+    setAnaliseIndividual(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('analise-individual', {
+        body: { clienteId }
+      });
+
+      if (error) throw error;
+
+      setAnaliseIndividual(data.analise);
+      toast.success("Análise individual gerada com sucesso!");
+    } catch (error: any) {
+      console.error("Erro ao gerar análise individual:", error);
+      toast.error(error.message || "Erro ao gerar análise individual");
+      setAnaliseIndividualOpen(false);
+    } finally {
+      setIsLoadingAnalise(false);
     }
   };
 
@@ -183,8 +242,33 @@ export default function Index() {
                     Ticket médio: R$ {metrics.ticketMedio.toFixed(2)}
                   </p>
                 </CardContent>
-              </Card>
-            </div>
+            </Card>
+          </div>
+
+          <AnaliseDialog
+            open={analiseGeralOpen}
+            onOpenChange={setAnaliseGeralOpen}
+            titulo="Análise Geral do Dia"
+            descricao="Relatório estratégico completo da sua carteira"
+            analise={analiseGeral}
+            isLoading={isLoadingAnalise}
+          />
+
+          <AnaliseDialog
+            open={analiseIndividualOpen}
+            onOpenChange={setAnaliseIndividualOpen}
+            titulo="Análise Individual de Cliente"
+            descricao="Análise profunda e recomendações personalizadas"
+            analise={analiseIndividual}
+            isLoading={isLoadingAnalise}
+          />
+
+          <ClienteSelectorDialog
+            open={clienteSelectorOpen}
+            onOpenChange={setClienteSelectorOpen}
+            onSelect={handleAnaliseIndividual}
+            userId={user.id}
+          />
 
             {/* CTAs principais */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -207,7 +291,7 @@ export default function Index() {
                     Receba insights inteligentes sobre todos os seus clientes, prioridades de contato, 
                     oportunidades de venda e alertas de risco.
                   </p>
-                  <Button className="w-full" size="lg">
+                  <Button className="w-full" size="lg" onClick={handleAnaliseGeral}>
                     <Sparkles className="w-4 h-4 mr-2" />
                     Iniciar Análise Geral
                   </Button>
@@ -233,7 +317,7 @@ export default function Index() {
                     Selecione um cliente e receba recomendações personalizadas, perfil comportamental 
                     e script de abordagem ideal.
                   </p>
-                  <Button variant="secondary" className="w-full" size="lg">
+                  <Button variant="secondary" className="w-full" size="lg" onClick={() => setClienteSelectorOpen(true)}>
                     <UserSearch className="w-4 h-4 mr-2" />
                     Analisar Cliente
                   </Button>
