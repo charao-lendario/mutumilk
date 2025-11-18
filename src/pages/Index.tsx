@@ -4,7 +4,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogOut, Milk, TrendingUp, Users, DollarSign, Target, Sparkles, UserSearch } from "lucide-react";
+import { LogOut, TrendingUp, Users, DollarSign, Target, Sparkles, UserSearch } from "lucide-react";
+import logo from "@/assets/mutuamilk-logo.png";
 
 export default function Index() {
   const { user, isLoading, userRole, signOut } = useAuth();
@@ -104,9 +105,7 @@ export default function Index() {
       <header className="border-b bg-card/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <Milk className="w-6 h-6 text-primary" />
-            </div>
+            <img src={logo} alt="MutuaMilk Tech" className="h-10 object-contain" />
             <div>
               <h1 className="text-xl font-bold">Gestão Comercial</h1>
               <p className="text-sm text-muted-foreground">
