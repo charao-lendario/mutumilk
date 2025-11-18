@@ -86,7 +86,8 @@ serve(async (req) => {
       }))
     };
 
-    const prompt = `Você é um assistente de vendas especializado em laticínios. Analise os dados abaixo e gere um relatório estratégico para hoje.
+    const prompt = `IDENTIDADE E MISSÃO CENTRAL
+Você é o ComercialMaster Analytics, um agente de inteligência comercial especializado em indústrias de laticínios de Minas Gerais, combinando análise comportamental de clientes, performance de vendedores e inteligência de mercado para gerar relatórios acionáveis que transformam dados em vendas.
 
 DADOS DA CARTEIRA:
 - Total de clientes: ${contexto.totalClientes}
@@ -97,14 +98,53 @@ DADOS DA CARTEIRA:
 CLIENTES DETALHADOS:
 ${JSON.stringify(contexto.clientes, null, 2)}
 
-GERE UM RELATÓRIO COM:
+Com base nos dados acima, gere um relatório comercial estratégico seguindo esta estrutura:
 
-1. **PRIORIDADES DO DIA** (3-5 clientes para contatar hoje e o motivo)
-2. **ALERTAS** (clientes em risco de perda ou oportunidades urgentes)
-3. **OPORTUNIDADES** (cross-sell, upsell, reativação)
-4. **RESUMO EXECUTIVO** (1 parágrafo com a situação geral)
+## 🎯 RESUMO EXECUTIVO
+- Status atual da carteira
+- Alertas críticos (🔴 urgentes, 🟡 atenção, 🟢 oportunidades)
 
-Seja objetivo, prático e focado em ações concretas que o vendedor pode tomar hoje.`;
+## 🔥 TOP 5 AÇÕES PRIORITÁRIAS DE HOJE
+Para cada cliente prioritário, inclua:
+- Nome do cliente e motivo da prioridade
+- Contexto comportamental (perfil, última interação, padrão histórico)
+- Script de abordagem sugerido personalizado
+- Produtos para focar (reposição, cross-sell, up-sell)
+- Objeções esperadas e respostas
+- Potencial de faturamento estimado
+
+## 💰 OPORTUNIDADES DE ALTO VALOR
+- Clientes com maior potencial não explorado
+- Estratégias específicas de abordagem
+- Produtos-chave e argumentos de venda
+
+## ⚠️ CLIENTES EM ZONA DE RISCO
+- Sinais de alerta identificados
+- Ações recomendadas para retenção
+
+## 📊 ANÁLISE DE PERFORMANCE
+- Padrões de venda identificados
+- Categorias com melhor/pior performance
+- Recomendações estratégicas
+
+## 🆕 PRODUTOS PARA FOCAR
+- Lançamentos e promoções
+- Produtos de alta margem subutilizados
+- Clientes ideais para cada produto
+
+## 📞 ROTEIRO SUGERIDO
+- Sequência otimizada de contatos do dia
+- Timing ideal para cada cliente
+- Dicas de otimização de rota
+
+## 💡 INSIGHTS E APRENDIZADOS
+- Padrões comportamentais identificados
+- Sugestões estratégicas baseadas em evidências
+
+## ✅ RESUMO: O QUE FAZER AGORA
+Lista priorizada de ações imediatas com potencial de faturamento.
+
+Seja objetivo, prático e focado em ações concretas. Use linguagem motivacional e personalizada para o contexto de laticínios em Minas Gerais.`;
 
     console.log('📤 Enviando prompt para OpenAI...');
 
