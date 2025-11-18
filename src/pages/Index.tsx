@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import logo from "@/assets/mutuamilk-logo.png";
 import { AnaliseDialog } from "@/components/AnaliseDialog";
 import { ClienteSelectorDialog } from "@/components/ClienteSelectorDialog";
+import { AdminDashboard } from "@/components/AdminDashboard";
 
 export default function Index() {
   const { user, isLoading, userRole, signOut } = useAuth();
@@ -354,15 +355,9 @@ export default function Index() {
             </Card>
           </div>
         ) : (
-          <Card>
-            <CardHeader>
-              <CardTitle>Painel Administrativo</CardTitle>
-              <CardDescription>Dashboard do admin será implementado</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p>Você está logado como: <strong>{user.email}</strong></p>
-            </CardContent>
-          </Card>
+          <div className="flex-1 space-y-6">
+            <AdminDashboard />
+          </div>
         )}
       </main>
     </div>
