@@ -31,105 +31,74 @@ export function AdminDashboard() {
 
   const loadAdminMetrics = async () => {
     setIsLoading(true);
-    try {
-      // Buscar vendedores (usuários com role vendedor)
-      const { data: vendedoresData } = await supabase
-        .from("user_roles")
-        .select("user_id, profiles(full_name)")
-        .eq("role", "vendedor");
+    
+    // Simular delay de carregamento
+    await new Promise(resolve => setTimeout(resolve, 800));
 
-      if (!vendedoresData) return;
+    // Dados mockados de vendedores
+    const mockVendedores: VendedorMetrics[] = [
+      {
+        id: "1",
+        nome: "Carlos Silva",
+        totalClientes: 12,
+        clientesAtivos: 10,
+        vendasMes: 48500.00,
+        ticketMedio: 3850.00,
+        analisesGeradas: 18,
+      },
+      {
+        id: "2",
+        nome: "Ana Paula Santos",
+        totalClientes: 10,
+        clientesAtivos: 9,
+        vendasMes: 42300.00,
+        ticketMedio: 4100.00,
+        analisesGeradas: 15,
+      },
+      {
+        id: "3",
+        nome: "Roberto Oliveira",
+        totalClientes: 11,
+        clientesAtivos: 8,
+        vendasMes: 38700.00,
+        ticketMedio: 3520.00,
+        analisesGeradas: 12,
+      },
+      {
+        id: "4",
+        nome: "Mariana Costa",
+        totalClientes: 9,
+        clientesAtivos: 8,
+        vendasMes: 35200.00,
+        ticketMedio: 3900.00,
+        analisesGeradas: 14,
+      },
+      {
+        id: "5",
+        nome: "Pedro Almeida",
+        totalClientes: 8,
+        clientesAtivos: 6,
+        vendasMes: 28900.00,
+        ticketMedio: 3610.00,
+        analisesGeradas: 9,
+      },
+    ];
 
-      // Para cada vendedor, buscar suas métricas
-      const metricsPromises = vendedoresData.map(async (v: any) => {
-        const userId = v.user_id;
-        const nome = v.profiles?.full_name || "Sem nome";
+    setVendedores(mockVendedores);
 
-        // Buscar clientes do vendedor
-        const { data: clientes } = await supabase
-          .from("clientes")
-          .select("*, pedidos(valor_total, data_pedido)")
-          .eq("vendedor_id", userId);
+    // Calcular totais
+    const totais = mockVendedores.reduce(
+      (acc, v) => ({
+        totalVendedores: acc.totalVendedores + 1,
+        totalClientes: acc.totalClientes + v.totalClientes,
+        totalVendasMes: acc.totalVendasMes + v.vendasMes,
+        totalAnalises: acc.totalAnalises + v.analisesGeradas,
+      }),
+      { totalVendedores: 0, totalClientes: 0, totalVendasMes: 0, totalAnalises: 0 }
+    );
 
-        // Buscar análises IA geradas
-        const { data: analises } = await supabase
-          .from("analises_ia")
-          .select("id")
-          .eq("vendedor_id", userId);
-
-        if (!clientes) {
-          return {
-            id: userId,
-            nome,
-            totalClientes: 0,
-            clientesAtivos: 0,
-            vendasMes: 0,
-            ticketMedio: 0,
-            analisesGeradas: analises?.length || 0,
-          };
-        }
-
-        // Calcular métricas
-        const agora = new Date();
-        const mesAtual = agora.getMonth();
-        const anoAtual = agora.getFullYear();
-        const trintaDiasAtras = new Date();
-        trintaDiasAtras.setDate(agora.getDate() - 30);
-
-        const clientesAtivos = clientes.filter(c => 
-          c.ultima_compra && new Date(c.ultima_compra) > trintaDiasAtras
-        ).length;
-
-        let vendasMes = 0;
-        clientes.forEach(cliente => {
-          if (cliente.pedidos && Array.isArray(cliente.pedidos)) {
-            cliente.pedidos.forEach((pedido: any) => {
-              const dataPedido = new Date(pedido.data_pedido);
-              if (dataPedido.getMonth() === mesAtual && dataPedido.getFullYear() === anoAtual) {
-                vendasMes += Number(pedido.valor_total);
-              }
-            });
-          }
-        });
-
-        const totalTickets = clientes.reduce((sum, c) => sum + Number(c.ticket_medio || 0), 0);
-        const ticketMedio = clientes.length > 0 ? totalTickets / clientes.length : 0;
-
-        return {
-          id: userId,
-          nome,
-          totalClientes: clientes.length,
-          clientesAtivos,
-          vendasMes,
-          ticketMedio,
-          analisesGeradas: analises?.length || 0,
-        };
-      });
-
-      const metrics = await Promise.all(metricsPromises);
-      
-      // Ordenar por vendas do mês (maior primeiro)
-      metrics.sort((a, b) => b.vendasMes - a.vendasMes);
-      
-      setVendedores(metrics);
-
-      // Calcular totais
-      const totais = metrics.reduce(
-        (acc, v) => ({
-          totalVendedores: acc.totalVendedores + 1,
-          totalClientes: acc.totalClientes + v.totalClientes,
-          totalVendasMes: acc.totalVendasMes + v.vendasMes,
-          totalAnalises: acc.totalAnalises + v.analisesGeradas,
-        }),
-        { totalVendedores: 0, totalClientes: 0, totalVendasMes: 0, totalAnalises: 0 }
-      );
-
-      setTotais(totais);
-    } catch (error) {
-      console.error("Erro ao carregar métricas admin:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    setTotais(totais);
+    setIsLoading(false);
   };
 
   const formatCurrency = (value: number) => {
