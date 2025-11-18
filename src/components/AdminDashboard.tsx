@@ -126,7 +126,7 @@ export function AdminDashboard() {
   return (
     <div className="space-y-6">
       {/* Cards de Totais */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Vendedores</CardTitle>
@@ -155,7 +155,7 @@ export function AdminDashboard() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(totais.totalVendasMes)}</div>
+            <div className="text-xl md:text-2xl font-bold">{formatCurrency(totais.totalVendasMes)}</div>
             <p className="text-xs text-muted-foreground">Faturamento mensal</p>
           </CardContent>
         </Card>
@@ -182,55 +182,57 @@ export function AdminDashboard() {
           <CardDescription>Performance do mês atual ordenada por vendas</CardDescription>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[500px]">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-12">#</TableHead>
-                  <TableHead>Vendedor</TableHead>
-                  <TableHead className="text-right">Clientes</TableHead>
-                  <TableHead className="text-right">Ativos</TableHead>
-                  <TableHead className="text-right">Vendas Mês</TableHead>
-                  <TableHead className="text-right">Ticket Médio</TableHead>
-                  <TableHead className="text-right">Análises IA</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {vendedores.map((vendedor, index) => (
-                  <TableRow key={vendedor.id}>
-                    <TableCell className="font-medium">
-                      {index === 0 && <span className="text-yellow-500">🥇</span>}
-                      {index === 1 && <span className="text-gray-400">🥈</span>}
-                      {index === 2 && <span className="text-amber-600">🥉</span>}
-                      {index > 2 && <span className="text-muted-foreground">{index + 1}</span>}
-                    </TableCell>
-                    <TableCell className="font-medium">{vendedor.nome}</TableCell>
-                    <TableCell className="text-right">{vendedor.totalClientes}</TableCell>
-                    <TableCell className="text-right">
-                      <span className="text-green-600 font-medium">{vendedor.clientesAtivos}</span>
-                      <span className="text-muted-foreground text-xs">
-                        {vendedor.totalClientes > 0 
-                          ? ` (${Math.round((vendedor.clientesAtivos / vendedor.totalClientes) * 100)}%)`
-                          : ' (0%)'}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right font-semibold">
-                      {formatCurrency(vendedor.vendasMes)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(vendedor.ticketMedio)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Sparkles className="h-3 w-3 text-primary" />
-                        <span>{vendedor.analisesGeradas}</span>
-                      </div>
-                    </TableCell>
+          <div className="rounded-md border">
+            <ScrollArea className="h-[400px] md:h-[500px]">
+              <Table>
+                <TableHeader className="sticky top-0 bg-background">
+                  <TableRow>
+                    <TableHead className="w-12">#</TableHead>
+                    <TableHead>Vendedor</TableHead>
+                    <TableHead className="text-right hidden sm:table-cell">Clientes</TableHead>
+                    <TableHead className="text-right hidden md:table-cell">Ativos</TableHead>
+                    <TableHead className="text-right">Vendas</TableHead>
+                    <TableHead className="text-right hidden lg:table-cell">Ticket Médio</TableHead>
+                    <TableHead className="text-right hidden sm:table-cell">Análises</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </ScrollArea>
+                </TableHeader>
+                <TableBody>
+                  {vendedores.map((vendedor, index) => (
+                    <TableRow key={vendedor.id}>
+                      <TableCell className="font-medium">
+                        {index === 0 && <span className="text-yellow-500">🥇</span>}
+                        {index === 1 && <span className="text-gray-400">🥈</span>}
+                        {index === 2 && <span className="text-amber-600">🥉</span>}
+                        {index > 2 && <span className="text-muted-foreground">{index + 1}</span>}
+                      </TableCell>
+                      <TableCell className="font-medium">{vendedor.nome}</TableCell>
+                      <TableCell className="text-right hidden sm:table-cell">{vendedor.totalClientes}</TableCell>
+                      <TableCell className="text-right hidden md:table-cell">
+                        <span className="text-green-600 font-medium">{vendedor.clientesAtivos}</span>
+                        <span className="text-muted-foreground text-xs">
+                          {vendedor.totalClientes > 0 
+                            ? ` (${Math.round((vendedor.clientesAtivos / vendedor.totalClientes) * 100)}%)`
+                            : ' (0%)'}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right font-semibold">
+                        {formatCurrency(vendedor.vendasMes)}
+                      </TableCell>
+                      <TableCell className="text-right hidden lg:table-cell">
+                        {formatCurrency(vendedor.ticketMedio)}
+                      </TableCell>
+                      <TableCell className="text-right hidden sm:table-cell">
+                        <div className="flex items-center justify-end gap-1">
+                          <Sparkles className="h-3 w-3 text-primary" />
+                          <span>{vendedor.analisesGeradas}</span>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </ScrollArea>
+          </div>
         </CardContent>
       </Card>
     </div>
