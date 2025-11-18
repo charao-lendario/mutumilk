@@ -2,3 +2,9 @@ project_id = "wcytvlviyfyidrbzlusg"
 
 [functions.seed-data]
 verify_jwt = false
+
+[functions.analise-geral]
+verify_jwt = true
+
+[functions.analise-individual]
+verify_jwt = true
