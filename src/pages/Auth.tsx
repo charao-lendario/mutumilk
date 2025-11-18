@@ -1,48 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Milk, Database } from "lucide-react";
+import { Milk } from "lucide-react";
 
 export default function Auth() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const [isSeeding, setIsSeeding] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
 
-  const handleSeedData = async () => {
-    setIsSeeding(true);
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/seed-data`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+  useEffect(() => {
+    const initializeData = async () => {
+      try {
+        // Verifica se já existem dados
+        const { data: existingUsers } = await supabase.from("profiles").select("id").limit(1);
+        
+        if (!existingUsers || existingUsers.length === 0) {
+          console.log("Inicializando dados de teste...");
+          
+          const response = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/seed-data`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            console.error("Erro ao inicializar dados:", data.error);
+          } else {
+            toast.success("Sistema inicializado! Use as credenciais de exemplo para fazer login.");
+          }
         }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Erro ao popular dados");
+      } catch (error) {
+        console.error("Erro na inicialização:", error);
+      } finally {
+        setIsInitializing(false);
       }
+    };
 
-      toast.success("Dados de teste criados com sucesso! Você já pode fazer login.");
-    } catch (error: any) {
-      toast.error(error.message || "Erro ao popular dados");
-    } finally {
-      setIsSeeding(false);
-    }
-  };
+    initializeData();
+  }, []);
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -98,6 +109,25 @@ export default function Auth() {
     }
   };
 
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-8 pb-8">
+            <div className="text-center space-y-4">
+              <div className="flex justify-center">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Milk className="w-8 h-8 text-primary animate-pulse" />
+                </div>
+              </div>
+              <p className="text-muted-foreground">Inicializando sistema...</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4">
       <Card className="w-full max-w-md">
@@ -145,30 +175,6 @@ export default function Auth() {
                   {isLoading ? "Entrando..." : "Entrar"}
                 </Button>
               </form>
-
-              <div className="mt-6 space-y-3">
-                <div className="p-4 bg-muted/50 rounded-lg space-y-2">
-                  <p className="text-sm font-semibold text-muted-foreground">Contas de teste:</p>
-                  <div className="text-xs space-y-1 text-muted-foreground">
-                    <p><strong>Admin:</strong> admin@laticinio.com / Admin123</p>
-                    <p><strong>Vendedor:</strong> vendedor1@laticinio.com / Vend123</p>
-                  </div>
-                </div>
-                
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  onClick={handleSeedData}
-                  disabled={isSeeding}
-                >
-                  <Database className="w-4 h-4 mr-2" />
-                  {isSeeding ? "Criando dados de teste..." : "Popular Dados de Teste"}
-                </Button>
-                <p className="text-xs text-center text-muted-foreground">
-                  Cria 1 admin, 5 vendedores, 50 clientes e 150+ pedidos
-                </p>
-              </div>
             </TabsContent>
 
             <TabsContent value="signup">
@@ -213,6 +219,16 @@ export default function Auth() {
               </form>
             </TabsContent>
           </Tabs>
+          
+          <div className="mt-6 pt-4 border-t border-border">
+            <div className="text-xs text-muted-foreground space-y-2">
+              <p className="font-semibold text-foreground text-center">Credenciais de Teste:</p>
+              <div className="bg-muted/50 rounded-md p-3 space-y-1">
+                <p><strong>Admin:</strong> admin@laticinio.com / Admin123</p>
+                <p><strong>Vendedor:</strong> vendedor1@laticinio.com / Vend123</p>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
