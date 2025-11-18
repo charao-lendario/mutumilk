@@ -19,27 +19,38 @@ serve(async (req) => {
 
     console.log("🌱 Iniciando seed de dados...");
 
-    // Criar Admin
-    console.log("📝 Criando usuário admin...");
-    const { data: adminUser, error: adminError } = await supabaseAdmin.auth.admin.createUser({
-      email: "admin@laticinio.com",
-      password: "Admin123",
-      email_confirm: true,
-      user_metadata: { full_name: "Maria Santos" },
-    });
+    // Criar ou buscar Admin
+    console.log("📝 Verificando usuário admin...");
+    let adminUserId: string;
+    
+    const { data: existingAdminList } = await supabaseAdmin.auth.admin.listUsers();
+    const existingAdmin = existingAdminList?.users.find(u => u.email === "admin@laticinio.com");
+    
+    if (existingAdmin) {
+      console.log("✅ Admin já existe, usando usuário existente");
+      adminUserId = existingAdmin.id;
+    } else {
+      const { data: adminUser, error: adminError } = await supabaseAdmin.auth.admin.createUser({
+        email: "admin@laticinio.com",
+        password: "Admin123",
+        email_confirm: true,
+        user_metadata: { full_name: "Maria Santos" },
+      });
 
-    if (adminError) throw new Error(`Erro ao criar admin: ${adminError.message}`);
-    console.log("✅ Admin criado");
+      if (adminError) throw new Error(`Erro ao criar admin: ${adminError.message}`);
+      adminUserId = adminUser.user.id;
+      console.log("✅ Admin criado");
 
-    // Inserir profile e role do admin
-    await supabaseAdmin.from("profiles").insert({
-      id: adminUser.user.id,
-      full_name: "Maria Santos",
-    });
-    await supabaseAdmin.from("user_roles").insert({
-      user_id: adminUser.user.id,
-      role: "admin",
-    });
+      // Inserir profile e role do admin
+      await supabaseAdmin.from("profiles").upsert({
+        id: adminUserId,
+        full_name: "Maria Santos",
+      });
+      await supabaseAdmin.from("user_roles").upsert({
+        user_id: adminUserId,
+        role: "admin",
+      });
+    }
 
     // Criar Vendedores
     const vendedores = [
@@ -53,27 +64,35 @@ serve(async (req) => {
     const vendedorIds: string[] = [];
 
     for (const vendedor of vendedores) {
-      console.log(`📝 Criando vendedor: ${vendedor.nome}...`);
-      const { data: vendedorUser, error: vendedorError } = await supabaseAdmin.auth.admin.createUser({
-        email: vendedor.email,
-        password: "Vend123",
-        email_confirm: true,
-        user_metadata: { full_name: vendedor.nome },
-      });
+      console.log(`📝 Verificando vendedor: ${vendedor.nome}...`);
+      
+      const existingVendedor = existingAdminList?.users.find(u => u.email === vendedor.email);
+      
+      if (existingVendedor) {
+        console.log(`✅ Vendedor ${vendedor.nome} já existe`);
+        vendedorIds.push(existingVendedor.id);
+      } else {
+        const { data: vendedorUser, error: vendedorError } = await supabaseAdmin.auth.admin.createUser({
+          email: vendedor.email,
+          password: "Vend123",
+          email_confirm: true,
+          user_metadata: { full_name: vendedor.nome },
+        });
 
-      if (vendedorError) throw new Error(`Erro ao criar vendedor: ${vendedorError.message}`);
+        if (vendedorError) throw new Error(`Erro ao criar vendedor: ${vendedorError.message}`);
 
-      await supabaseAdmin.from("profiles").insert({
-        id: vendedorUser.user.id,
-        full_name: vendedor.nome,
-      });
-      await supabaseAdmin.from("user_roles").insert({
-        user_id: vendedorUser.user.id,
-        role: "vendedor",
-      });
+        await supabaseAdmin.from("profiles").upsert({
+          id: vendedorUser.user.id,
+          full_name: vendedor.nome,
+        });
+        await supabaseAdmin.from("user_roles").upsert({
+          user_id: vendedorUser.user.id,
+          role: "vendedor",
+        });
 
-      vendedorIds.push(vendedorUser.user.id);
-      console.log(`✅ Vendedor ${vendedor.nome} criado`);
+        vendedorIds.push(vendedorUser.user.id);
+        console.log(`✅ Vendedor ${vendedor.nome} criado`);
+      }
     }
 
     // Buscar produtos para usar nos pedidos
