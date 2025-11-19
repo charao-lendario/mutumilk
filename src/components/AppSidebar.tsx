@@ -3,7 +3,7 @@ import { LayoutDashboard, LogOut } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import logo from "@/assets/mutuamilk-logo.png";
+import logo from "@/assets/mutumilk-logo.png";
 import {
   Sidebar,
   SidebarContent,
@@ -39,8 +39,8 @@ export function AppSidebar() {
     <Sidebar className={collapsed ? "w-14" : "w-60"} collapsible="icon">
       <SidebarHeader className="border-b p-4">
         <div className="flex items-center gap-2">
-          <img src={logo} alt="MutuMilk" className="h-8 w-8 object-contain" />
-          {!collapsed && <span className="font-semibold text-base md:text-lg">MutuMilk</span>}
+          <img src={logo} alt="Mutumilk Tecnologia" className="h-8 w-auto object-contain" />
+          {!collapsed && <span className="font-semibold text-base md:text-lg">Mutumilk</span>}
         </div>
       </SidebarHeader>
 
