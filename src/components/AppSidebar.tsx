@@ -32,7 +32,7 @@ export function AppSidebar() {
   const items = userRole === "admin" ? adminItems : vendedorItems;
   return <Sidebar className={collapsed ? "w-14" : "w-60"} collapsible="icon">
       <SidebarHeader className="border-b p-4">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           <img src={logo} alt="Mutumilk Tecnologia" className="h-24 w-auto object-contain" />
           {!collapsed}
         </div>
