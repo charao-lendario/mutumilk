@@ -8,6 +8,7 @@ import { TrendingUp, Users, DollarSign, Target, Sparkles, UserSearch } from "luc
 import { toast } from "sonner";
 import { AnaliseDialog } from "@/components/AnaliseDialog";
 import { ClienteSelectorDialog } from "@/components/ClienteSelectorDialog";
+import { ClientesListDialog } from "@/components/ClientesListDialog";
 import { AdminDashboard } from "@/components/AdminDashboard";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
@@ -32,6 +33,11 @@ export default function Index() {
   const [analiseGeral, setAnaliseGeral] = useState<string | null>(null);
   const [analiseIndividual, setAnaliseIndividual] = useState<string | null>(null);
   const [isLoadingAnalise, setIsLoadingAnalise] = useState(false);
+  const [clientesListOpen, setClientesListOpen] = useState(false);
+  const [clientesList, setClientesList] = useState<any[]>([]);
+  const [clientesListTitle, setClientesListTitle] = useState("");
+  const [clientesListDescription, setClientesListDescription] = useState("");
+  const [todosClientes, setTodosClientes] = useState<any[]>([]);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -56,6 +62,8 @@ export default function Index() {
         .eq("vendedor_id", user.id);
 
       if (!clientes) return;
+
+      setTodosClientes(clientes);
 
       const agora = new Date();
       const mesAtual = agora.getMonth();
@@ -213,7 +221,26 @@ export default function Index() {
                     </CardContent>
                   </Card>
 
-                  <Card className="border-yellow-500/50 bg-yellow-500/5">
+                  <Card 
+                    className="border-yellow-500/50 bg-yellow-500/5 cursor-pointer hover:bg-yellow-500/10 transition-colors"
+                    onClick={() => {
+                      const trintaDiasAtras = new Date();
+                      trintaDiasAtras.setDate(new Date().getDate() - 30);
+                      const sessentaDiasAtras = new Date();
+                      sessentaDiasAtras.setDate(new Date().getDate() - 60);
+                      
+                      const clientesEmRisco = todosClientes.filter(c =>
+                        c.ultima_compra && 
+                        new Date(c.ultima_compra) <= trintaDiasAtras &&
+                        new Date(c.ultima_compra) > sessentaDiasAtras
+                      );
+                      
+                      setClientesList(clientesEmRisco);
+                      setClientesListTitle("⚠️ Clientes em Risco");
+                      setClientesListDescription("Clientes que não compram há 30-60 dias");
+                      setClientesListOpen(true);
+                    }}
+                  >
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">⚠️ Em Risco</CardTitle>
                       <Users className="h-4 w-4 text-yellow-500" />
@@ -226,7 +253,22 @@ export default function Index() {
                     </CardContent>
                   </Card>
 
-                  <Card className="border-red-500/50 bg-red-500/5">
+                  <Card 
+                    className="border-red-500/50 bg-red-500/5 cursor-pointer hover:bg-red-500/10 transition-colors"
+                    onClick={() => {
+                      const sessentaDiasAtras = new Date();
+                      sessentaDiasAtras.setDate(new Date().getDate() - 60);
+                      
+                      const clientesCriticos = todosClientes.filter(c =>
+                        !c.ultima_compra || new Date(c.ultima_compra) <= sessentaDiasAtras
+                      );
+                      
+                      setClientesList(clientesCriticos);
+                      setClientesListTitle("🚨 Clientes Críticos");
+                      setClientesListDescription("Clientes que não compram há mais de 60 dias");
+                      setClientesListOpen(true);
+                    }}
+                  >
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">🚨 Críticos</CardTitle>
                       <Users className="h-4 w-4 text-red-500" />
@@ -239,7 +281,19 @@ export default function Index() {
                     </CardContent>
                   </Card>
 
-                  <Card className="border-orange-500/50 bg-orange-500/5">
+                  <Card 
+                    className="border-orange-500/50 bg-orange-500/5 cursor-pointer hover:bg-orange-500/10 transition-colors"
+                    onClick={() => {
+                      const clientesTicketBaixo = todosClientes.filter(c => 
+                        Number(c.ticket_medio || 0) < 200
+                      );
+                      
+                      setClientesList(clientesTicketBaixo);
+                      setClientesListTitle("📉 Clientes com Ticket Baixo");
+                      setClientesListDescription("Clientes com ticket médio abaixo de R$ 200");
+                      setClientesListOpen(true);
+                    }}
+                  >
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">📉 Ticket Baixo</CardTitle>
                       <DollarSign className="h-4 w-4 text-orange-500" />
@@ -386,6 +440,14 @@ export default function Index() {
         onOpenChange={setClienteSelectorOpen}
         onSelect={handleAnaliseIndividual}
         userId={user?.id || ""}
+      />
+
+      <ClientesListDialog
+        open={clientesListOpen}
+        onOpenChange={setClientesListOpen}
+        clientes={clientesList}
+        title={clientesListTitle}
+        description={clientesListDescription}
       />
     </SidebarProvider>
   );
