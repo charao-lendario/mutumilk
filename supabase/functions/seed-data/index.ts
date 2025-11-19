@@ -145,27 +145,51 @@ serve(async (req) => {
 
         if (!cliente) continue;
 
-        // Criar padrões de compra variados (clientes bons, regulares, em risco, inativos)
-        const perfilCliente = j % 4; // 0: ativo bom, 1: regular, 2: em risco, 3: inativo
+        // PERFIS MAIS REALISTAS COM FOCO EM PROBLEMAS (60% clientes com problemas)
+        // Distribuição: 20% ótimo, 20% bom, 25% em risco, 20% crítico, 15% perdido
+        let perfilCliente: number;
+        const rand = j % 10;
+        if (rand < 2) {
+          perfilCliente = 0; // Ótimo (20%)
+        } else if (rand < 4) {
+          perfilCliente = 1; // Bom (20%)
+        } else if (rand < 6) {
+          perfilCliente = 2; // Regular/Em Risco (20%)
+        } else if (rand < 8) {
+          perfilCliente = 3; // Crítico (20%)
+        } else if (rand < 9) {
+          perfilCliente = 4; // Inativo (10%)
+        } else {
+          perfilCliente = 5; // Perdido (10%)
+        }
+        
         let numPedidos: number;
         let diasUltimaCompra: number;
         
         if (perfilCliente === 0) {
-          // Cliente ativo e bom: 5-7 pedidos, última compra recente (0-15 dias)
-          numPedidos = 5 + Math.floor(Math.random() * 3);
-          diasUltimaCompra = Math.floor(Math.random() * 15);
+          // ÓTIMO: Crescimento constante, compra frequente, ticket alto
+          numPedidos = 8 + Math.floor(Math.random() * 4); // 8-11 pedidos
+          diasUltimaCompra = Math.floor(Math.random() * 7); // 0-7 dias
         } else if (perfilCliente === 1) {
-          // Cliente regular: 3-4 pedidos, última compra 20-40 dias
-          numPedidos = 3 + Math.floor(Math.random() * 2);
-          diasUltimaCompra = 20 + Math.floor(Math.random() * 20);
+          // BOM: Cliente estável, compra regular
+          numPedidos = 5 + Math.floor(Math.random() * 3); // 5-7 pedidos
+          diasUltimaCompra = 8 + Math.floor(Math.random() * 15); // 8-22 dias
         } else if (perfilCliente === 2) {
-          // Cliente em risco: 2-3 pedidos, última compra 60-90 dias (alerta!)
-          numPedidos = 2 + Math.floor(Math.random() * 2);
-          diasUltimaCompra = 60 + Math.floor(Math.random() * 30);
+          // EM RISCO: Frequência caindo, ticket diminuindo, precisa atenção
+          numPedidos = 4 + Math.floor(Math.random() * 2); // 4-5 pedidos
+          diasUltimaCompra = 35 + Math.floor(Math.random() * 25); // 35-59 dias (ALERTA!)
+        } else if (perfilCliente === 3) {
+          // CRÍTICO: Parou de comprar, última compra há muito tempo
+          numPedidos = 2 + Math.floor(Math.random() * 2); // 2-3 pedidos
+          diasUltimaCompra = 60 + Math.floor(Math.random() * 40); // 60-99 dias (URGENTE!)
+        } else if (perfilCliente === 4) {
+          // INATIVO: Cliente praticamente perdido
+          numPedidos = 1 + Math.floor(Math.random() * 2); // 1-2 pedidos
+          diasUltimaCompra = 100 + Math.floor(Math.random() * 50); // 100-149 dias (CRÍTICO!)
         } else {
-          // Cliente inativo: 1-2 pedidos antigos, última compra 120-180 dias (crítico!)
-          numPedidos = 1 + Math.floor(Math.random() * 2);
-          diasUltimaCompra = 120 + Math.floor(Math.random() * 60);
+          // PERDIDO: Cliente completamente inativo, pode ter mudado de fornecedor
+          numPedidos = 1;
+          diasUltimaCompra = 150 + Math.floor(Math.random() * 60); // 150-209 dias (PERDIDO!)
         }
 
         let ultimaCompra = new Date();
@@ -179,17 +203,23 @@ serve(async (req) => {
             // Primeira iteração é a última compra
             diasAtras = diasUltimaCompra;
           } else if (perfilCliente === 0) {
-            // Cliente ativo: compras regulares a cada 15-30 dias
-            diasAtras = diasUltimaCompra + (k * (15 + Math.floor(Math.random() * 15)));
+            // ÓTIMO: Compras frequentes e regulares (a cada 7-15 dias)
+            diasAtras = diasUltimaCompra + (k * (7 + Math.floor(Math.random() * 8)));
           } else if (perfilCliente === 1) {
-            // Cliente regular: compras a cada 30-45 dias
-            diasAtras = diasUltimaCompra + (k * (30 + Math.floor(Math.random() * 15)));
+            // BOM: Compras regulares (a cada 15-25 dias)
+            diasAtras = diasUltimaCompra + (k * (15 + Math.floor(Math.random() * 10)));
           } else if (perfilCliente === 2) {
-            // Cliente em risco: compras antigas espaçadas
-            diasAtras = diasUltimaCompra + (k * (40 + Math.floor(Math.random() * 20)));
+            // EM RISCO: Espaçamento CRESCENTE entre compras (problemas visíveis)
+            diasAtras = diasUltimaCompra + (k * (25 + k * 10 + Math.floor(Math.random() * 15)));
+          } else if (perfilCliente === 3) {
+            // CRÍTICO: Compras muito espaçadas e irregulares
+            diasAtras = diasUltimaCompra + (k * (40 + Math.floor(Math.random() * 30)));
+          } else if (perfilCliente === 4) {
+            // INATIVO: Compras raríssimas
+            diasAtras = diasUltimaCompra + (k * (60 + Math.floor(Math.random() * 40)));
           } else {
-            // Cliente inativo: compras muito antigas
-            diasAtras = diasUltimaCompra + (k * (50 + Math.floor(Math.random() * 30)));
+            // PERDIDO: Compras antigas e esporádicas
+            diasAtras = diasUltimaCompra + (k * (80 + Math.floor(Math.random() * 50)));
           }
           
           const dataPedido = new Date();
@@ -199,26 +229,34 @@ serve(async (req) => {
             ultimaCompra = dataPedido;
           }
 
-          // Selecionar produtos baseado no perfil
+          // Selecionar produtos baseado no perfil e SIMULAR QUEDA
           let numItens: number;
           let quantidadeMultiplicador: number;
           
           if (perfilCliente === 0) {
-            // Cliente bom: 4-8 itens, quantidades maiores
-            numItens = 4 + Math.floor(Math.random() * 5);
-            quantidadeMultiplicador = 1.5;
+            // ÓTIMO: Muitos itens, quantidades crescentes
+            numItens = 5 + Math.floor(Math.random() * 6);
+            quantidadeMultiplicador = 1.2 + (k * 0.15); // CRESCE a cada pedido
           } else if (perfilCliente === 1) {
-            // Cliente regular: 3-5 itens, quantidades médias
-            numItens = 3 + Math.floor(Math.random() * 3);
+            // BOM: Itens e quantidades estáveis
+            numItens = 4 + Math.floor(Math.random() * 4);
             quantidadeMultiplicador = 1.0;
           } else if (perfilCliente === 2) {
-            // Cliente em risco: 2-4 itens, quantidades menores e decrescentes
+            // EM RISCO: Quantidade CAI drasticamente, menos itens
             numItens = 2 + Math.floor(Math.random() * 3);
-            quantidadeMultiplicador = 0.7 - (k * 0.1); // Vai diminuindo a cada pedido
+            quantidadeMultiplicador = Math.max(0.3, 1.0 - (k * 0.15)); // CAI a cada pedido
+          } else if (perfilCliente === 3) {
+            // CRÍTICO: Pedidos muito pequenos e esporádicos
+            numItens = 1 + Math.floor(Math.random() * 2);
+            quantidadeMultiplicador = Math.max(0.2, 0.6 - (k * 0.1));
+          } else if (perfilCliente === 4) {
+            // INATIVO: Pedido mínimo
+            numItens = 1 + Math.floor(Math.random() * 2);
+            quantidadeMultiplicador = 0.3;
           } else {
-            // Cliente inativo: 2-3 itens, quantidades pequenas
-            numItens = 2 + Math.floor(Math.random() * 2);
-            quantidadeMultiplicador = 0.5;
+            // PERDIDO: Pedido ínfimo
+            numItens = 1;
+            quantidadeMultiplicador = 0.2;
           }
           
           const produtosSelecionados = [];

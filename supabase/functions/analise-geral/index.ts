@@ -72,46 +72,89 @@ serve(async (req) => {
       !c.ultima_compra || new Date(c.ultima_compra) <= trintaDiasAtras
     ) || [];
 
+    const sessentaDiasAtras = new Date();
+    sessentaDiasAtras.setDate(agora.getDate() - 60);
+
+    const clientesEmRisco = clientes?.filter(c =>
+      c.ultima_compra && 
+      new Date(c.ultima_compra) <= trintaDiasAtras &&
+      new Date(c.ultima_compra) > sessentaDiasAtras
+    ) || [];
+
+    const clientesCriticos = clientes?.filter(c =>
+      !c.ultima_compra || new Date(c.ultima_compra) <= sessentaDiasAtras
+    ) || [];
+
+    // Calcular dias desde última compra para cada cliente
+    const clientesDetalhados = clientes?.map(c => {
+      const ultimaCompra = c.ultima_compra ? new Date(c.ultima_compra) : null;
+      const diasSemComprar = ultimaCompra 
+        ? Math.floor((agora.getTime() - ultimaCompra.getTime()) / (1000 * 60 * 60 * 24))
+        : 999;
+      
+      const pedidosRecentes = Array.isArray(c.pedidos) ? c.pedidos.slice(0, 3) : [];
+      const valorTotalRecente = pedidosRecentes.reduce((sum: number, p: any) => sum + Number(p.valor_total || 0), 0);
+      
+      return {
+        nome: c.nome,
+        tipo: c.tipo,
+        ultimaCompra: c.ultima_compra,
+        diasSemComprar,
+        ticketMedio: Number(c.ticket_medio || 0),
+        totalPedidos: Array.isArray(c.pedidos) ? c.pedidos.length : 0,
+        valorRecenteTotal: valorTotalRecente,
+        situacao: diasSemComprar <= 30 ? 'ATIVO' : 
+                  diasSemComprar <= 60 ? 'EM RISCO' : 
+                  'CRÍTICO'
+      };
+    }) || [];
+
     const contexto = {
       totalClientes: clientes?.length || 0,
       clientesAtivos: clientesAtivos.length,
       clientesInativos: clientesInativos.length,
+      clientesEmRisco: clientesEmRisco.length,
+      clientesCriticos: clientesCriticos.length,
       promocoes: promocoes?.length || 0,
-      clientes: clientes?.map(c => ({
-        nome: c.nome,
-        tipo: c.tipo,
-        ultimaCompra: c.ultima_compra,
-        ticketMedio: c.ticket_medio,
-        totalPedidos: Array.isArray(c.pedidos) ? c.pedidos.length : 0
-      }))
+      clientes: clientesDetalhados
     };
 
     const prompt = `IDENTIDADE E MISSÃO CENTRAL
 Você é o ComercialMaster Analytics, um agente de inteligência comercial especializado em indústrias de laticínios de Minas Gerais, combinando análise comportamental de clientes, performance de vendedores e inteligência de mercado para gerar relatórios acionáveis que transformam dados em vendas.
 
-DADOS DA CARTEIRA:
+⚠️ FOCO CRÍTICO: Esta carteira tem PROBLEMAS SÉRIOS! Sua missão é identificar com precisão cirúrgica os clientes em risco e criar planos de ação imediatos.
+
+DADOS DA CARTEIRA (SITUAÇÃO ATUAL):
 - Total de clientes: ${contexto.totalClientes}
-- Clientes ativos (últimos 30 dias): ${contexto.clientesAtivos}
-- Clientes inativos: ${contexto.clientesInativos}
-- Produtos em promoção: ${contexto.promocoes}
+- ✅ Clientes ativos (últimos 30 dias): ${contexto.clientesAtivos} (${Math.round((contexto.clientesAtivos / contexto.totalClientes) * 100)}%)
+- ⚠️ Clientes EM RISCO (30-60 dias): ${contexto.clientesEmRisco} (${Math.round((contexto.clientesEmRisco / contexto.totalClientes) * 100)}%)
+- 🚨 Clientes CRÍTICOS (+60 dias): ${contexto.clientesCriticos} (${Math.round((contexto.clientesCriticos / contexto.totalClientes) * 100)}%)
+- 📦 Produtos em promoção: ${contexto.promocoes}
 
-CLIENTES DETALHADOS:
-${JSON.stringify(contexto.clientes, null, 2)}
+🔴 ALERTA: ${contexto.clientesEmRisco + contexto.clientesCriticos} clientes (${Math.round(((contexto.clientesEmRisco + contexto.clientesCriticos) / contexto.totalClientes) * 100)}%) PRECISAM ATENÇÃO URGENTE!
 
-Com base nos dados acima, gere um relatório comercial estratégico seguindo esta estrutura:
+CLIENTES DETALHADOS (ordenados por prioridade de ação):
+${JSON.stringify(contexto.clientes.sort((a, b) => b.diasSemComprar - a.diasSemComprar), null, 2)}
 
-## 🎯 RESUMO EXECUTIVO
-- Status atual da carteira
-- Alertas críticos (🔴 urgentes, 🟡 atenção, 🟢 oportunidades)
+Com base nos dados acima, gere um relatório comercial FOCADO EM RESOLVER PROBLEMAS seguindo esta estrutura:
 
-## 🔥 TOP 5 AÇÕES PRIORITÁRIAS DE HOJE
-Para cada cliente prioritário, inclua:
-- Nome do cliente e motivo da prioridade
-- Contexto comportamental (perfil, última interação, padrão histórico)
-- Script de abordagem sugerido personalizado
-- Produtos para focar (reposição, cross-sell, up-sell)
-- Objeções esperadas e respostas
-- Potencial de faturamento estimado
+## 🚨 SITUAÇÃO CRÍTICA DA CARTEIRA
+- Análise BRUTAL da situação: Quantos % da carteira estão em risco real?
+- ALERTAS CRÍTICOS prioritizados por urgência e potencial de perda:
+  - 🔴 URGENTE (Perda iminente - Ligar HOJE)
+  - 🟡 ATENÇÃO (Em declínio - Agendar esta semana)
+  - 🟢 OPORTUNIDADE (Crescimento possível)
+
+## 🔥 TOP 5 CLIENTES MAIS CRÍTICOS (LIGAR HOJE!)
+Para CADA cliente em situação crítica, forneça:
+- **Nome e Situação**: Quantos dias sem comprar? Quanto está perdendo?
+- **Por que está sumindo**: Análise comportamental (padrão de queda, sinais de alerta)
+- **SCRIPT DE RECUPERAÇÃO**: O que falar na ligação para reconquistar
+  - Abordagem: Como iniciar a conversa (sem ser insistente)
+  - Oferta irrecusável: Promoção personalizada que ele não pode recusar
+  - Objeções previstas: O que ele pode falar e como responder
+- **Meta desta ação**: Quanto R$ recuperar com este cliente
+- **Prazo**: Quando DEVE ligar (HOJE, Amanhã, Esta semana)
 
 ## 💰 OPORTUNIDADES DE ALTO VALOR
 - Clientes com maior potencial não explorado

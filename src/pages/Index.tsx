@@ -19,8 +19,11 @@ export default function Index() {
     totalClientes: 0,
     clientesAtivos: 0,
     clientesInativos: 0,
+    clientesEmRisco: 0,
+    clientesCriticos: 0,
     vendasMes: 0,
     ticketMedio: 0,
+    ticketMedioBaixo: 0,
   });
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
   const [analiseGeralOpen, setAnaliseGeralOpen] = useState(false);
@@ -59,12 +62,27 @@ export default function Index() {
       const anoAtual = agora.getFullYear();
       const trintaDiasAtras = new Date();
       trintaDiasAtras.setDate(agora.getDate() - 30);
+      const sessentaDiasAtras = new Date();
+      sessentaDiasAtras.setDate(agora.getDate() - 60);
 
+      // CLIENTES ATIVOS: Última compra nos últimos 30 dias
       const clientesAtivos = clientes.filter(c => 
         c.ultima_compra && new Date(c.ultima_compra) > trintaDiasAtras
       ).length;
 
-      const clientesInativos = clientes.length - clientesAtivos;
+      // CLIENTES EM RISCO: Última compra entre 30-60 dias (precisa atenção!)
+      const clientesEmRisco = clientes.filter(c =>
+        c.ultima_compra && 
+        new Date(c.ultima_compra) <= trintaDiasAtras &&
+        new Date(c.ultima_compra) > sessentaDiasAtras
+      ).length;
+
+      // CLIENTES CRÍTICOS/INATIVOS: Última compra há mais de 60 dias (urgente!)
+      const clientesCriticos = clientes.filter(c =>
+        !c.ultima_compra || new Date(c.ultima_compra) <= sessentaDiasAtras
+      ).length;
+
+      const clientesInativos = clientesCriticos;
 
       let vendasMes = 0;
       clientes.forEach(cliente => {
@@ -81,12 +99,18 @@ export default function Index() {
       const totalTickets = clientes.reduce((sum, c) => sum + Number(c.ticket_medio || 0), 0);
       const ticketMedio = clientes.length > 0 ? totalTickets / clientes.length : 0;
 
+      // Identificar clientes com ticket médio BAIXO (abaixo de R$ 200)
+      const ticketMedioBaixo = clientes.filter(c => Number(c.ticket_medio || 0) < 200).length;
+
       setMetrics({
         totalClientes: clientes.length,
         clientesAtivos,
         clientesInativos,
+        clientesEmRisco,
+        clientesCriticos,
         vendasMes,
         ticketMedio,
+        ticketMedioBaixo,
       });
     } catch (error) {
       console.error("Erro ao carregar métricas:", error);
@@ -178,7 +202,7 @@ export default function Index() {
             {userRole === "vendedor" ? (
               <div className="space-y-4 md:space-y-6 max-w-7xl mx-auto">
                 {/* Métricas */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">Total de Clientes</CardTitle>
@@ -188,33 +212,48 @@ export default function Index() {
                       <div className="text-2xl font-bold">
                         {isLoadingMetrics ? "..." : metrics.totalClientes}
                       </div>
-                      <p className="text-xs text-muted-foreground">Em sua carteira</p>
+                      <p className="text-xs text-muted-foreground">
+                        {metrics.clientesAtivos} ativos / {metrics.clientesInativos} inativos
+                      </p>
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card className="border-yellow-500/50 bg-yellow-500/5">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Clientes Ativos</CardTitle>
-                      <TrendingUp className="h-4 w-4 text-success" />
+                      <CardTitle className="text-sm font-medium">⚠️ Em Risco</CardTitle>
+                      <Users className="h-4 w-4 text-yellow-500" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold text-success">
-                        {isLoadingMetrics ? "..." : metrics.clientesAtivos}
+                      <div className="text-2xl font-bold text-yellow-600">
+                        {isLoadingMetrics ? "..." : metrics.clientesEmRisco}
                       </div>
-                      <p className="text-xs text-muted-foreground">Últimos 30 dias</p>
+                      <p className="text-xs text-muted-foreground">30-60 dias sem comprar</p>
                     </CardContent>
                   </Card>
 
-                  <Card>
+                  <Card className="border-red-500/50 bg-red-500/5">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Clientes Inativos</CardTitle>
-                      <Target className="h-4 w-4 text-warning" />
+                      <CardTitle className="text-sm font-medium">🚨 Críticos</CardTitle>
+                      <Users className="h-4 w-4 text-red-500" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold text-warning">
-                        {isLoadingMetrics ? "..." : metrics.clientesInativos}
+                      <div className="text-2xl font-bold text-red-600">
+                        {isLoadingMetrics ? "..." : metrics.clientesCriticos}
                       </div>
-                      <p className="text-xs text-muted-foreground">+30 dias</p>
+                      <p className="text-xs text-muted-foreground">+60 dias sem comprar</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="border-orange-500/50 bg-orange-500/5">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">📉 Ticket Baixo</CardTitle>
+                      <DollarSign className="h-4 w-4 text-orange-500" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold text-orange-600">
+                        {isLoadingMetrics ? "..." : metrics.ticketMedioBaixo}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Abaixo de R$ 200</p>
                     </CardContent>
                   </Card>
 
@@ -222,6 +261,83 @@ export default function Index() {
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">Vendas do Mês</CardTitle>
                       <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {isLoadingMetrics ? "..." : new Intl.NumberFormat("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        }).format(metrics.vendasMes)}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Últimos 30 dias</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Ticket Médio</CardTitle>
+                      <Target className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {isLoadingMetrics ? "..." : new Intl.NumberFormat("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        }).format(metrics.ticketMedio)}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Por cliente</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Performance</CardTitle>
+                      <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {isLoadingMetrics ? "..." : ((metrics.clientesAtivos / Math.max(metrics.totalClientes, 1)) * 100).toFixed(1)}%
+                      </div>
+                      <p className="text-xs text-muted-foreground">Taxa de atividade</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">🎯 Prioridade</CardTitle>
+                      <Target className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">
+                        {isLoadingMetrics ? "..." : metrics.clientesEmRisco + metrics.clientesCriticos}
+                      </div>
+                      <p className="text-xs text-muted-foreground">Clientes precisam atenção</p>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Ações IA */}
+                <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2">
+                  <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                        <Sparkles className="h-5 w-5" />
+                        Análise Geral do Dia
+                      </CardTitle>
+                      <CardDescription className="text-xs md:text-sm">
+                        Visão estratégica completa da sua carteira de clientes
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Button 
+                        onClick={handleAnaliseGeral}
+                        className="w-full"
+                        size="lg"
+                      >
+                        Gerar Análise Geral
+                      </Button>
+                    </CardContent>
+                  </Card>
                     </CardHeader>
                     <CardContent>
                       <div className="text-xl md:text-2xl font-bold">
