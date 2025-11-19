@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import logo from "@/assets/mutuamilk-logo.png";
+import logo from "@/assets/mutumilk-logo.png";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -116,7 +116,7 @@ export default function Auth() {
           <CardContent className="pt-8 pb-8">
             <div className="text-center space-y-4">
               <div className="flex justify-center">
-                <img src={logo} alt="MutuaMilk Tech" className="h-16 object-contain animate-pulse" />
+                <img src={logo} alt="Mutumilk Tecnologia" className="h-16 object-contain animate-pulse" />
               </div>
               <p className="text-muted-foreground">Inicializando sistema...</p>
             </div>
@@ -131,7 +131,7 @@ export default function Auth() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4 text-center">
           <div className="flex justify-center">
-            <img src={logo} alt="MutuaMilk Tech" className="h-20 object-contain" />
+            <img src={logo} alt="Mutumilk Tecnologia" className="h-20 object-contain" />
           </div>
           <CardTitle className="text-2xl">Sistema de Gestão Comercial</CardTitle>
           <CardDescription>Gestão Inteligente para Laticínios</CardDescription>
