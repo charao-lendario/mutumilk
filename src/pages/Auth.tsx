@@ -116,7 +116,7 @@ export default function Auth() {
           <CardContent className="pt-8 pb-8">
             <div className="text-center space-y-4">
               <div className="flex justify-center">
-                <img src={logo} alt="Mutumilk Tecnologia" className="h-24 object-contain animate-pulse" />
+                <img src={logo} alt="Mutumilk Tecnologia" className="h-48 object-contain animate-pulse" />
               </div>
               <p className="text-muted-foreground">Inicializando sistema...</p>
             </div>
@@ -131,7 +131,7 @@ export default function Auth() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4 text-center">
           <div className="flex justify-center">
-            <img src={logo} alt="Mutumilk Tecnologia" className="h-28 object-contain" />
+            <img src={logo} alt="Mutumilk Tecnologia" className="h-56 object-contain" />
           </div>
           <CardTitle className="text-2xl">Sistema de Gestão Comercial</CardTitle>
           <CardDescription>Gestão Inteligente para Laticínios</CardDescription>
