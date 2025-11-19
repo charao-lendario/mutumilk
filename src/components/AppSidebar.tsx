@@ -39,7 +39,7 @@ export function AppSidebar() {
     <Sidebar className={collapsed ? "w-14" : "w-60"} collapsible="icon">
       <SidebarHeader className="border-b p-4">
         <div className="flex items-center gap-2">
-          <img src={logo} alt="Mutumilk Tecnologia" className="h-8 w-auto object-contain" />
+          <img src={logo} alt="Mutumilk Tecnologia" className="h-12 w-auto object-contain" />
           {!collapsed && <span className="font-semibold text-base md:text-lg">Mutumilk</span>}
         </div>
       </SidebarHeader>
