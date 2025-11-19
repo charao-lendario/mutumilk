@@ -65,19 +65,16 @@ export default function Index() {
       const sessentaDiasAtras = new Date();
       sessentaDiasAtras.setDate(agora.getDate() - 60);
 
-      // CLIENTES ATIVOS: Última compra nos últimos 30 dias
       const clientesAtivos = clientes.filter(c => 
         c.ultima_compra && new Date(c.ultima_compra) > trintaDiasAtras
       ).length;
 
-      // CLIENTES EM RISCO: Última compra entre 30-60 dias (precisa atenção!)
       const clientesEmRisco = clientes.filter(c =>
         c.ultima_compra && 
         new Date(c.ultima_compra) <= trintaDiasAtras &&
         new Date(c.ultima_compra) > sessentaDiasAtras
       ).length;
 
-      // CLIENTES CRÍTICOS/INATIVOS: Última compra há mais de 60 dias (urgente!)
       const clientesCriticos = clientes.filter(c =>
         !c.ultima_compra || new Date(c.ultima_compra) <= sessentaDiasAtras
       ).length;
@@ -99,7 +96,6 @@ export default function Index() {
       const totalTickets = clientes.reduce((sum, c) => sum + Number(c.ticket_medio || 0), 0);
       const ticketMedio = clientes.length > 0 ? totalTickets / clientes.length : 0;
 
-      // Identificar clientes com ticket médio BAIXO (abaixo de R$ 200)
       const ticketMedioBaixo = clientes.filter(c => Number(c.ticket_medio || 0) < 200).length;
 
       setMetrics({
@@ -136,7 +132,7 @@ export default function Index() {
       setAnaliseGeral(data.analise);
       toast.success("Análise gerada com sucesso!");
     } catch (error: any) {
-      console.error("Erro ao gerar análise:", error);
+      console.error("Erro ao gerar análise geral:", error);
       toast.error("Erro ao gerar análise: " + (error.message || "Erro desconhecido"));
     } finally {
       setIsLoadingAnalise(false);
@@ -201,8 +197,7 @@ export default function Index() {
           <main className="flex-1 p-3 md:p-6 lg:p-8 overflow-auto">
             {userRole === "vendedor" ? (
               <div className="space-y-4 md:space-y-6 max-w-7xl mx-auto">
-                {/* Métricas */}
-                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                   <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                       <CardTitle className="text-sm font-medium">Total de Clientes</CardTitle>
@@ -316,7 +311,6 @@ export default function Index() {
                   </Card>
                 </div>
 
-                {/* Ações IA */}
                 <div className="grid gap-3 md:gap-4 grid-cols-1 md:grid-cols-2">
                   <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
                     <CardHeader>
@@ -338,64 +332,32 @@ export default function Index() {
                       </Button>
                     </CardContent>
                   </Card>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="text-xl md:text-2xl font-bold">
-                        {isLoadingMetrics ? "..." : `R$ ${metrics.vendasMes.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-                      </div>
-                      <p className="text-xs text-muted-foreground">Faturamento</p>
-                    </CardContent>
-                  </Card>
-                </div>
 
-                {/* Ações IA */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                  <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+                  <Card className="bg-gradient-to-br from-accent/10 to-primary/10 border-accent/20">
                     <CardHeader>
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="h-5 w-5 text-primary" />
-                        <CardTitle className="text-base md:text-lg">Análise Geral do Dia</CardTitle>
-                      </div>
+                      <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                        <UserSearch className="h-5 w-5" />
+                        Análise Individual
+                      </CardTitle>
                       <CardDescription className="text-xs md:text-sm">
-                        IA analisa sua carteira e gera plano de ação
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Button onClick={handleAnaliseGeral} className="w-full" size="lg">
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        Gerar Análise
-                      </Button>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
-                    <CardHeader>
-                      <div className="flex items-center gap-2">
-                        <UserSearch className="h-5 w-5 text-secondary" />
-                        <CardTitle className="text-base md:text-lg">Análise Individual</CardTitle>
-                      </div>
-                      <CardDescription className="text-xs md:text-sm">
-                        Análise de cliente com roteiro de abordagem
+                        Análise detalhada de um cliente específico
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
                       <Button 
-                        onClick={() => setClienteSelectorOpen(true)} 
-                        variant="secondary" 
-                        className="w-full" 
+                        onClick={() => setClienteSelectorOpen(true)}
+                        variant="outline"
+                        className="w-full"
                         size="lg"
                       >
-                        <UserSearch className="mr-2 h-4 w-4" />
-                        Analisar Cliente
+                        Selecionar Cliente
                       </Button>
                     </CardContent>
                   </Card>
                 </div>
               </div>
             ) : (
-              <div className="max-w-7xl mx-auto">
-                <AdminDashboard />
-              </div>
+              <AdminDashboard />
             )}
           </main>
         </div>
@@ -405,7 +367,7 @@ export default function Index() {
         open={analiseGeralOpen}
         onOpenChange={setAnaliseGeralOpen}
         titulo="Análise Geral do Dia"
-        descricao="Análise estratégica completa da sua carteira"
+        descricao="Visão estratégica completa da sua carteira de clientes"
         analise={analiseGeral}
         isLoading={isLoadingAnalise}
       />
@@ -414,7 +376,7 @@ export default function Index() {
         open={analiseIndividualOpen}
         onOpenChange={setAnaliseIndividualOpen}
         titulo="Análise Individual de Cliente"
-        descricao="Estratégia personalizada para este cliente"
+        descricao="Análise detalhada e ações recomendadas"
         analise={analiseIndividual}
         isLoading={isLoadingAnalise}
       />
@@ -423,7 +385,7 @@ export default function Index() {
         open={clienteSelectorOpen}
         onOpenChange={setClienteSelectorOpen}
         onSelect={handleAnaliseIndividual}
-        userId={user.id}
+        userId={user?.id || ""}
       />
     </SidebarProvider>
   );
