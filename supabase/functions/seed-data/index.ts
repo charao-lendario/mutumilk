@@ -145,23 +145,82 @@ serve(async (req) => {
 
         if (!cliente) continue;
 
-        // Criar entre 2 e 5 pedidos históricos para cada cliente
-        const numPedidos = 2 + Math.floor(Math.random() * 4);
+        // Criar padrões de compra variados (clientes bons, regulares, em risco, inativos)
+        const perfilCliente = j % 4; // 0: ativo bom, 1: regular, 2: em risco, 3: inativo
+        let numPedidos: number;
+        let diasUltimaCompra: number;
+        
+        if (perfilCliente === 0) {
+          // Cliente ativo e bom: 5-7 pedidos, última compra recente (0-15 dias)
+          numPedidos = 5 + Math.floor(Math.random() * 3);
+          diasUltimaCompra = Math.floor(Math.random() * 15);
+        } else if (perfilCliente === 1) {
+          // Cliente regular: 3-4 pedidos, última compra 20-40 dias
+          numPedidos = 3 + Math.floor(Math.random() * 2);
+          diasUltimaCompra = 20 + Math.floor(Math.random() * 20);
+        } else if (perfilCliente === 2) {
+          // Cliente em risco: 2-3 pedidos, última compra 60-90 dias (alerta!)
+          numPedidos = 2 + Math.floor(Math.random() * 2);
+          diasUltimaCompra = 60 + Math.floor(Math.random() * 30);
+        } else {
+          // Cliente inativo: 1-2 pedidos antigos, última compra 120-180 dias (crítico!)
+          numPedidos = 1 + Math.floor(Math.random() * 2);
+          diasUltimaCompra = 120 + Math.floor(Math.random() * 60);
+        }
+
         let ultimaCompra = new Date();
         let totalVendas = 0;
 
         for (let k = 0; k < numPedidos; k++) {
-          // Distribuir pedidos nos últimos 6 meses
-          const diasAtras = Math.floor(Math.random() * 180);
+          // Distribuir pedidos de forma realista baseado no perfil
+          let diasAtras: number;
+          
+          if (k === 0) {
+            // Primeira iteração é a última compra
+            diasAtras = diasUltimaCompra;
+          } else if (perfilCliente === 0) {
+            // Cliente ativo: compras regulares a cada 15-30 dias
+            diasAtras = diasUltimaCompra + (k * (15 + Math.floor(Math.random() * 15)));
+          } else if (perfilCliente === 1) {
+            // Cliente regular: compras a cada 30-45 dias
+            diasAtras = diasUltimaCompra + (k * (30 + Math.floor(Math.random() * 15)));
+          } else if (perfilCliente === 2) {
+            // Cliente em risco: compras antigas espaçadas
+            diasAtras = diasUltimaCompra + (k * (40 + Math.floor(Math.random() * 20)));
+          } else {
+            // Cliente inativo: compras muito antigas
+            diasAtras = diasUltimaCompra + (k * (50 + Math.floor(Math.random() * 30)));
+          }
+          
           const dataPedido = new Date();
           dataPedido.setDate(dataPedido.getDate() - diasAtras);
 
-          if (dataPedido > ultimaCompra) {
+          if (k === 0) {
             ultimaCompra = dataPedido;
           }
 
-          // Selecionar 2-6 produtos aleatórios
-          const numItens = 2 + Math.floor(Math.random() * 5);
+          // Selecionar produtos baseado no perfil
+          let numItens: number;
+          let quantidadeMultiplicador: number;
+          
+          if (perfilCliente === 0) {
+            // Cliente bom: 4-8 itens, quantidades maiores
+            numItens = 4 + Math.floor(Math.random() * 5);
+            quantidadeMultiplicador = 1.5;
+          } else if (perfilCliente === 1) {
+            // Cliente regular: 3-5 itens, quantidades médias
+            numItens = 3 + Math.floor(Math.random() * 3);
+            quantidadeMultiplicador = 1.0;
+          } else if (perfilCliente === 2) {
+            // Cliente em risco: 2-4 itens, quantidades menores e decrescentes
+            numItens = 2 + Math.floor(Math.random() * 3);
+            quantidadeMultiplicador = 0.7 - (k * 0.1); // Vai diminuindo a cada pedido
+          } else {
+            // Cliente inativo: 2-3 itens, quantidades pequenas
+            numItens = 2 + Math.floor(Math.random() * 2);
+            quantidadeMultiplicador = 0.5;
+          }
+          
           const produtosSelecionados = [];
           for (let p = 0; p < numItens; p++) {
             const produto = produtos[Math.floor(Math.random() * produtos.length)];
@@ -171,7 +230,8 @@ serve(async (req) => {
           // Calcular valor total do pedido
           let valorTotal = 0;
           const itens = produtosSelecionados.map((produto) => {
-            const quantidade = 1 + Math.floor(Math.random() * 10);
+            const quantidadeBase = 2 + Math.floor(Math.random() * 8);
+            const quantidade = Math.max(1, Math.floor(quantidadeBase * quantidadeMultiplicador));
             const subtotal = Number(produto.preco_atual) * quantidade;
             valorTotal += subtotal;
             return {
