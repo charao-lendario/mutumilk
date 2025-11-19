@@ -3,7 +3,7 @@ import { LayoutDashboard, LogOut } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import logo from "@/assets/mutumilk-logo.png";
+import logo from "@/assets/mutumilk-logo-circle.png";
 import {
   Sidebar,
   SidebarContent,
