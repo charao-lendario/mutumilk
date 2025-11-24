@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import logo from "@/assets/mutumilk-logo-circle.png";
+import { SparklesCore } from "@/components/ui/sparkles";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -111,17 +111,31 @@ export default function Auth() {
 
   if (isInitializing) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5">
-        <Card className="w-full max-w-md">
-          <CardContent className="pt-8 pb-8">
-            <div className="text-center space-y-4">
-              <div className="flex justify-center">
-                <img src={logo} alt="Mutumilk Tecnologia" className="h-48 object-contain animate-pulse" />
-              </div>
-              <p className="text-muted-foreground">Inicializando sistema...</p>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="h-screen w-full bg-background flex flex-col items-center justify-center overflow-hidden">
+        <div className="w-full absolute inset-0 h-screen">
+          <SparklesCore
+            id="tsparticlesfullpage"
+            background="transparent"
+            minSize={0.6}
+            maxSize={1.4}
+            particleDensity={100}
+            className="w-full h-full"
+            particleColor="#60a5fa"
+            speed={1}
+          />
+        </div>
+        <div className="relative z-20 flex flex-col items-center gap-4">
+          <h1 className="text-5xl md:text-7xl lg:text-9xl font-bold text-center text-foreground">
+            MutuMilk
+          </h1>
+          <div className="w-[40rem] h-40 relative">
+            <div className="absolute inset-x-20 top-0 bg-gradient-to-r from-transparent via-primary to-transparent h-[2px] w-3/4 blur-sm" />
+            <div className="absolute inset-x-20 top-0 bg-gradient-to-r from-transparent via-primary to-transparent h-px w-3/4" />
+            <div className="absolute inset-x-60 top-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent h-[5px] w-1/4 blur-sm" />
+            <div className="absolute inset-x-60 top-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent h-px w-1/4" />
+          </div>
+          <p className="text-muted-foreground text-lg animate-pulse">Inicializando sistema...</p>
+        </div>
       </div>
     );
   }
@@ -130,9 +144,6 @@ export default function Auth() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-4 text-center">
-          <div className="flex justify-center">
-            <img src={logo} alt="Mutumilk Tecnologia" className="h-56 object-contain" />
-          </div>
           <CardTitle className="text-2xl">Sistema de Gestão Comercial</CardTitle>
           <CardDescription>Gestão Inteligente para Laticínios</CardDescription>
         </CardHeader>
