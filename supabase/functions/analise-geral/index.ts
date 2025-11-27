@@ -53,11 +53,10 @@ serve(async (req) => {
       throw clientesError;
     }
 
-    // Buscar produtos em promoção
-    const { data: promocoes } = await supabase
+    // Buscar todos os produtos
+    const { data: produtos } = await supabase
       .from('produtos')
-      .select('*')
-      .eq('em_promocao', true);
+      .select('*');
 
     // Preparar contexto para a IA
     const agora = new Date();
@@ -115,79 +114,30 @@ serve(async (req) => {
       clientesInativos: clientesInativos.length,
       clientesEmRisco: clientesEmRisco.length,
       clientesCriticos: clientesCriticos.length,
-      promocoes: promocoes?.length || 0,
       clientes: clientesDetalhados
     };
 
-    const prompt = `IDENTIDADE E MISSÃO CENTRAL
-Você é o ComercialMaster Analytics, um agente de inteligência comercial especializado em indústrias de laticínios de Minas Gerais, combinando análise comportamental de clientes, performance de vendedores e inteligência de mercado para gerar relatórios acionáveis que transformam dados em vendas.
+    const prompt = `Você é um assistente comercial especializado em laticínios da Mutumilk. Analise os clientes abaixo e gere sugestões de pedidos personalizadas baseadas no histórico de compras de cada um.
 
-⚠️ FOCO CRÍTICO: Esta carteira tem PROBLEMAS SÉRIOS! Sua missão é identificar com precisão cirúrgica os clientes em risco e criar planos de ação imediatos.
+PORTFÓLIO DISPONÍVEL:
+${JSON.stringify(produtos, null, 2)}
 
-DADOS DA CARTEIRA (SITUAÇÃO ATUAL):
-- Total de clientes: ${contexto.totalClientes}
-- ✅ Clientes ativos (últimos 30 dias): ${contexto.clientesAtivos} (${Math.round((contexto.clientesAtivos / contexto.totalClientes) * 100)}%)
-- ⚠️ Clientes EM RISCO (30-60 dias): ${contexto.clientesEmRisco} (${Math.round((contexto.clientesEmRisco / contexto.totalClientes) * 100)}%)
-- 🚨 Clientes CRÍTICOS (+60 dias): ${contexto.clientesCriticos} (${Math.round((contexto.clientesCriticos / contexto.totalClientes) * 100)}%)
-- 📦 Produtos em promoção: ${contexto.promocoes}
-
-🔴 ALERTA: ${contexto.clientesEmRisco + contexto.clientesCriticos} clientes (${Math.round(((contexto.clientesEmRisco + contexto.clientesCriticos) / contexto.totalClientes) * 100)}%) PRECISAM ATENÇÃO URGENTE!
-
-CLIENTES DETALHADOS (ordenados por prioridade de ação):
+CLIENTES E HISTÓRICO:
 ${JSON.stringify(contexto.clientes.sort((a, b) => b.diasSemComprar - a.diasSemComprar), null, 2)}
 
-Com base nos dados acima, gere um relatório comercial FOCADO EM RESOLVER PROBLEMAS seguindo esta estrutura:
+Para cada cliente, sugira um pedido realista considerando:
+1. Histórico de ticket médio
+2. Dias sem comprar (clientes críticos precisam de ofertas agressivas)
+3. Tipo de estabelecimento
+4. Produtos mais adequados ao perfil
 
-## 🚨 SITUAÇÃO CRÍTICA DA CARTEIRA
-- Análise BRUTAL da situação: Quantos % da carteira estão em risco real?
-- ALERTAS CRÍTICOS prioritizados por urgência e potencial de perda:
-  - 🔴 URGENTE (Perda iminente - Ligar HOJE)
-  - 🟡 ATENÇÃO (Em declínio - Agendar esta semana)
-  - 🟢 OPORTUNIDADE (Crescimento possível)
-
-## 🔥 TOP 5 CLIENTES MAIS CRÍTICOS (LIGAR HOJE!)
-Para CADA cliente em situação crítica, forneça:
-- **Nome e Situação**: Quantos dias sem comprar? Quanto está perdendo?
-- **Por que está sumindo**: Análise comportamental (padrão de queda, sinais de alerta)
-- **SCRIPT DE RECUPERAÇÃO**: O que falar na ligação para reconquistar
-  - Abordagem: Como iniciar a conversa (sem ser insistente)
-  - Oferta irrecusável: Promoção personalizada que ele não pode recusar
-  - Objeções previstas: O que ele pode falar e como responder
-- **Meta desta ação**: Quanto R$ recuperar com este cliente
-- **Prazo**: Quando DEVE ligar (HOJE, Amanhã, Esta semana)
-
-## 💰 OPORTUNIDADES DE ALTO VALOR
-- Clientes com maior potencial não explorado
-- Estratégias específicas de abordagem
-- Produtos-chave e argumentos de venda
-
-## ⚠️ CLIENTES EM ZONA DE RISCO
-- Sinais de alerta identificados
-- Ações recomendadas para retenção
-
-## 📊 ANÁLISE DE PERFORMANCE
-- Padrões de venda identificados
-- Categorias com melhor/pior performance
-- Recomendações estratégicas
-
-## 🆕 PRODUTOS PARA FOCAR
-- Lançamentos e promoções
-- Produtos de alta margem subutilizados
-- Clientes ideais para cada produto
-
-## 📞 ROTEIRO SUGERIDO
-- Sequência otimizada de contatos do dia
-- Timing ideal para cada cliente
-- Dicas de otimização de rota
-
-## 💡 INSIGHTS E APRENDIZADOS
-- Padrões comportamentais identificados
-- Sugestões estratégicas baseadas em evidências
-
-## ✅ RESUMO: O QUE FAZER AGORA
-Lista priorizada de ações imediatas com potencial de faturamento.
-
-Seja objetivo, prático e focado em ações concretas. Use linguagem motivacional e personalizada para o contexto de laticínios em Minas Gerais.`;
+IMPORTANTE: Retorne APENAS um array JSON válido, sem texto adicional. Cada objeto deve ter:
+- nomeCliente: string
+- situacao: "ATIVO" | "EM RISCO" | "CRÍTICO"
+- diasSemComprar: number
+- pedidoSugerido: array de objetos com {produto, quantidade, precoUnitario, subtotal}
+- valorTotal: number
+- justificativa: string (máximo 2 linhas explicando a estratégia)`;
 
     console.log('📤 Enviando prompt para OpenAI...');
 
@@ -200,11 +150,12 @@ Seja objetivo, prático e focado em ações concretas. Use linguagem motivaciona
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'Você é um assistente de vendas especializado em análise de dados comerciais para laticínios.' },
+          { role: 'system', content: 'Você é um assistente de vendas que retorna APENAS JSON válido, sem markdown ou texto adicional.' },
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
-        max_tokens: 2000,
+        max_tokens: 3000,
+        response_format: { type: "json_object" }
       }),
     });
 
@@ -216,6 +167,15 @@ Seja objetivo, prático e focado em ações concretas. Use linguagem motivaciona
 
     const data = await response.json();
     const analise = data.choices[0].message.content;
+    
+    let sugestoesClientes;
+    try {
+      const parsed = JSON.parse(analise);
+      sugestoesClientes = parsed.sugestoes || parsed;
+    } catch (e) {
+      console.error('Erro ao parsear JSON:', e);
+      sugestoesClientes = [];
+    }
 
     console.log('✅ Análise gerada com sucesso');
 
@@ -226,8 +186,8 @@ Seja objetivo, prático e focado em ações concretas. Use linguagem motivaciona
         vendedor_id: user.id,
         tipo_analise: 'geral',
         prompt_enviado: prompt,
-        resposta_ia: analise,
-        sugestoes_geradas: contexto
+        resposta_ia: JSON.stringify(sugestoesClientes),
+        sugestoes_geradas: { contexto, sugestoesClientes }
       });
 
     if (insertError) {
@@ -235,7 +195,7 @@ Seja objetivo, prático e focado em ações concretas. Use linguagem motivaciona
     }
 
     return new Response(
-      JSON.stringify({ analise, contexto }),
+      JSON.stringify({ sugestoesClientes, contexto }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 

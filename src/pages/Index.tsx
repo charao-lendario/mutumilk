@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { TrendingUp, Users, DollarSign, Target, Sparkles, UserSearch } from "lucide-react";
 import { toast } from "sonner";
 import { AnaliseDialog } from "@/components/AnaliseDialog";
+import { AnaliseGeralDialog } from "@/components/AnaliseGeralDialog";
 import { ClienteSelectorDialog } from "@/components/ClienteSelectorDialog";
 import { ClientesListDialog } from "@/components/ClientesListDialog";
 import { AdminDashboard } from "@/components/AdminDashboard";
@@ -30,7 +31,7 @@ export default function Index() {
   const [analiseGeralOpen, setAnaliseGeralOpen] = useState(false);
   const [analiseIndividualOpen, setAnaliseIndividualOpen] = useState(false);
   const [clienteSelectorOpen, setClienteSelectorOpen] = useState(false);
-  const [analiseGeral, setAnaliseGeral] = useState<string | null>(null);
+  const [sugestoesGerais, setSugestoesGerais] = useState<any[] | null>(null);
   const [analiseIndividual, setAnaliseIndividual] = useState<string | null>(null);
   const [isLoadingAnalise, setIsLoadingAnalise] = useState(false);
   const [clientesListOpen, setClientesListOpen] = useState(false);
@@ -128,7 +129,7 @@ export default function Index() {
     
     setAnaliseGeralOpen(true);
     setIsLoadingAnalise(true);
-    setAnaliseGeral(null);
+    setSugestoesGerais(null);
 
     try {
       const { data, error } = await supabase.functions.invoke('analise-geral', {
@@ -137,7 +138,7 @@ export default function Index() {
 
       if (error) throw error;
 
-      setAnaliseGeral(data.analise);
+      setSugestoesGerais(data.sugestoesClientes);
       toast.success("Análise gerada com sucesso!");
     } catch (error: any) {
       console.error("Erro ao gerar análise geral:", error);
@@ -417,12 +418,10 @@ export default function Index() {
         </div>
       </div>
 
-      <AnaliseDialog
+      <AnaliseGeralDialog
         open={analiseGeralOpen}
         onOpenChange={setAnaliseGeralOpen}
-        titulo="Análise Geral do Dia"
-        descricao="Visão estratégica completa da sua carteira de clientes"
-        analise={analiseGeral}
+        sugestoes={sugestoesGerais}
         isLoading={isLoadingAnalise}
       />
 
