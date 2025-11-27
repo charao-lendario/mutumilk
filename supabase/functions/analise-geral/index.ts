@@ -117,7 +117,7 @@ serve(async (req) => {
       clientes: clientesDetalhados
     };
 
-    const prompt = `Você é um assistente comercial especializado em laticínios da Mutumilk. Analise os clientes abaixo e gere sugestões de pedidos personalizadas baseadas no histórico de compras de cada um.
+    const prompt = `Você é um assistente comercial especializado em laticínios da Mutumilk. Analise os clientes abaixo e gere sugestões de pedidos personalizadas.
 
 PORTFÓLIO DISPONÍVEL:
 ${JSON.stringify(produtos, null, 2)}
@@ -125,19 +125,27 @@ ${JSON.stringify(produtos, null, 2)}
 CLIENTES E HISTÓRICO:
 ${JSON.stringify(contexto.clientes.sort((a, b) => b.diasSemComprar - a.diasSemComprar), null, 2)}
 
-Para cada cliente, sugira um pedido realista considerando:
-1. Histórico de ticket médio
-2. Dias sem comprar (clientes críticos precisam de ofertas agressivas)
-3. Tipo de estabelecimento
-4. Produtos mais adequados ao perfil
+IMPORTANTE: Retorne um JSON no formato exato:
+{
+  "sugestoes": [
+    {
+      "nomeCliente": "Nome do Cliente",
+      "situacao": "ATIVO" | "EM RISCO" | "CRÍTICO",
+      "diasSemComprar": 15,
+      "pedidoSugerido": [
+        {"produto": "Nome Produto", "quantidade": 2, "precoUnitario": 26.29, "subtotal": 52.58}
+      ],
+      "valorTotal": 52.58,
+      "justificativa": "Breve explicação da estratégia"
+    }
+  ]
+}
 
-IMPORTANTE: Retorne APENAS um array JSON válido, sem texto adicional. Cada objeto deve ter:
-- nomeCliente: string
-- situacao: "ATIVO" | "EM RISCO" | "CRÍTICO"
-- diasSemComprar: number
-- pedidoSugerido: array de objetos com {produto, quantidade, precoUnitario, subtotal}
-- valorTotal: number
-- justificativa: string (máximo 2 linhas explicando a estratégia)`;
+Para cada cliente, considere:
+- Ticket médio histórico
+- Dias sem comprar (críticos precisam ofertas agressivas)
+- Tipo de estabelecimento
+- Produtos adequados ao perfil`;
 
     console.log('📤 Enviando prompt para OpenAI...');
 
@@ -171,9 +179,15 @@ IMPORTANTE: Retorne APENAS um array JSON válido, sem texto adicional. Cada obje
     let sugestoesClientes;
     try {
       const parsed = JSON.parse(analise);
-      sugestoesClientes = parsed.sugestoes || parsed;
+      // Tentar diferentes estruturas possíveis de retorno
+      sugestoesClientes = parsed.sugestoes || 
+                         parsed.sugestoesPedidos || 
+                         (parsed.sugestoesClientes?.sugestoesPedidos) ||
+                         (Array.isArray(parsed) ? parsed : []);
+      
+      console.log('📋 Sugestões processadas:', sugestoesClientes.length, 'clientes');
     } catch (e) {
-      console.error('Erro ao parsear JSON:', e);
+      console.error('❌ Erro ao parsear JSON:', e, 'Conteúdo:', analise);
       sugestoesClientes = [];
     }
 
