@@ -117,37 +117,81 @@ serve(async (req) => {
       clientes: clientesDetalhados
     };
 
-    const prompt = `Você é um assistente comercial especializado em laticínios da Mutumilk. Analise os clientes abaixo e gere sugestões de pedidos personalizadas.
+    const prompt = `Você é um Diretor Comercial Sênior da Mutumilk com 15 anos de experiência em vendas B2B de laticínios. Sua missão é criar estratégias agressivas de vendas que maximizem o faturamento e recuperem clientes.
 
-PORTFÓLIO DISPONÍVEL:
+CONTEXTO CRÍTICO:
+- Mutumilk é uma INDÚSTRIA de laticínios, não um distribuidor pequeno
+- Estabelecimentos comerciais compram VOLUMES GRANDES (caixas fechadas, bags de 28kg)
+- Cada cliente perdido = R$ 50-200 mil/ano de faturamento
+- Concorrentes estão ativos - se não vendermos, eles vendem
+
+PORTFÓLIO COMPLETO MUTUMILK:
 ${JSON.stringify(produtos, null, 2)}
 
-CLIENTES E HISTÓRICO:
+INTELIGÊNCIA DE MERCADO - ANÁLISE DETALHADA DOS CLIENTES:
 ${JSON.stringify(contexto.clientes.sort((a, b) => b.diasSemComprar - a.diasSemComprar), null, 2)}
 
-IMPORTANTE: Retorne um JSON no formato exato:
+MISSÃO: Crie uma estratégia de pedidos AGRESSIVA e INTELIGENTE para CADA cliente.
+
+REGRAS DE OURO:
+1. PEDIDOS GRANDES: Supermercados compram 50-100kg/semana, padarias 30-50kg, restaurantes 20-40kg
+2. PENSE EM GIRO: Cliente ativo = pedido de reposição. Cliente crítico = pedido de reconquista (30-50% maior que o ticket médio)
+3. MIX ESTRATÉGICO: Sempre inclua 3-5 produtos diferentes (queijos + cremes + especialidades)
+4. MARGEM vs VOLUME: Balance produtos de alta margem (Provolone, Requeijão Premium) com carros-chefe (Mussarela)
+5. JUSTIFICATIVA PROFUNDA: Não apenas LISTE produtos, mas EXPLIQUE a estratégia comercial completa
+
+PARA CADA CLIENTE, ANALISE:
+- Padrão de compra histórico (queda? crescimento? estável?)
+- Potencial não explorado (está comprando pouco comparado ao porte?)
+- Perfil do estabelecimento (fluxo alto = mais fatiados, padaria = mais requeijão)
+- Urgência comercial (quanto tempo sem comprar = quanto risco de perder?)
+- Oportunidade de mix (está comprando só mussarela? Venda Prato, Provolone, Cremes!)
+
+ESTRUTURA DO JSON (OBRIGATÓRIA):
 {
   "sugestoes": [
     {
-      "nomeCliente": "Nome do Cliente",
+      "nomeCliente": "Nome Exato do Cliente",
       "situacao": "ATIVO" | "EM RISCO" | "CRÍTICO",
-      "diasSemComprar": 15,
+      "diasSemComprar": numero,
+      "analiseComportamental": "Análise profunda: padrões de compra, mudanças de comportamento, sinais de risco ou oportunidade (3-4 linhas)",
       "pedidoSugerido": [
-        {"produto": "Nome Produto", "quantidade": 2, "precoUnitario": 26.29, "subtotal": 52.58}
+        {
+          "produto": "Nome exato do produto",
+          "quantidade": numero_realista_para_industria,
+          "precoUnitario": preco_unitario,
+          "subtotal": quantidade * precoUnitario,
+          "justificativaProduto": "Por que ESTE produto para ESTE cliente neste momento"
+        }
       ],
-      "valorTotal": 52.58,
-      "justificativa": "Breve explicação da estratégia"
+      "valorTotal": soma_dos_subtotais,
+      "estrategiaComercial": "Estratégia completa de abordagem: (1) Como abordar o cliente, (2) Argumentos de venda específicos, (3) Objeções previstas e respostas, (4) Urgência da ação (5-6 linhas)",
+      "potencialRecuperacao": "Para clientes críticos/em risco: quanto de faturamento mensal/anual pode ser recuperado com sucesso",
+      "proximasAcoes": "Lista de 3-4 ações concretas e imediatas que o vendedor deve executar"
     }
   ]
 }
 
-Para cada cliente, considere:
-- Ticket médio histórico
-- Dias sem comprar (críticos precisam ofertas agressivas)
-- Tipo de estabelecimento
-- Produtos adequados ao perfil`;
+EXEMPLOS DE RACIOCÍNIO ESPERADO:
 
-    console.log('📤 Enviando prompt para OpenAI...');
+CLIENTE CRÍTICO (90+ dias):
+- Pedido: 150-200% do ticket médio (pedido agressivo de reconquista)
+- Estratégia: Ofertas irrecusáveis, condições especiais, visita pessoal URGENTE
+- Mix: Produtos de entrada (mussarela) + alto valor (provolone) + commodity (creme granel)
+
+CLIENTE EM RISCO (30-60 dias):
+- Pedido: 120-150% do ticket médio (reativar antes de perder)
+- Estratégia: Ligação proativa, check-in de satisfação, mostrar novidades
+- Mix: Reforçar best-sellers + apresentar 1-2 produtos novos
+
+CLIENTE ATIVO:
+- Pedido: 100-120% do ticket médio (crescer a conta)
+- Estratégia: Upsell e cross-sell, aumentar ticket e frequência
+- Mix: Produtos habituais + oportunidades de margem
+
+RETORNE APENAS O JSON, SEM TEXTO ADICIONAL.`;
+
+    console.log('📤 Enviando prompt aprimorado para OpenAI...');
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -158,11 +202,11 @@ Para cada cliente, considere:
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'Você é um assistente de vendas que retorna APENAS JSON válido, sem markdown ou texto adicional.' },
+          { role: 'system', content: 'Você é um Diretor Comercial estratégico que retorna APENAS JSON válido, sem markdown ou texto adicional. Suas análises são profundas, baseadas em dados e focadas em maximizar vendas.' },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.7,
-        max_tokens: 3000,
+        temperature: 0.8,
+        max_tokens: 4000,
         response_format: { type: "json_object" }
       }),
     });
