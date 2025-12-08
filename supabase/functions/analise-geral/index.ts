@@ -220,18 +220,37 @@ RETORNE APENAS O JSON, SEM TEXTO ADICIONAL.`;
     const data = await response.json();
     const analise = data.choices[0].message.content;
     
-    let sugestoesClientes;
+    console.log('📥 Resposta bruta da IA recebida, tamanho:', analise?.length || 0);
+    
+    let sugestoesClientes = [];
     try {
       const parsed = JSON.parse(analise);
+      console.log('📦 Estrutura do JSON:', Object.keys(parsed));
+      
       // Tentar diferentes estruturas possíveis de retorno
-      sugestoesClientes = parsed.sugestoes || 
-                         parsed.sugestoesPedidos || 
-                         (parsed.sugestoesClientes?.sugestoesPedidos) ||
-                         (Array.isArray(parsed) ? parsed : []);
+      if (Array.isArray(parsed)) {
+        sugestoesClientes = parsed;
+      } else if (parsed.sugestoes && Array.isArray(parsed.sugestoes)) {
+        sugestoesClientes = parsed.sugestoes;
+      } else if (parsed.sugestoesPedidos && Array.isArray(parsed.sugestoesPedidos)) {
+        sugestoesClientes = parsed.sugestoesPedidos;
+      } else if (parsed.sugestoesClientes && Array.isArray(parsed.sugestoesClientes)) {
+        sugestoesClientes = parsed.sugestoesClientes;
+      } else {
+        // Tentar encontrar qualquer array no objeto
+        for (const key of Object.keys(parsed)) {
+          if (Array.isArray(parsed[key]) && parsed[key].length > 0) {
+            console.log('🔍 Encontrado array em:', key);
+            sugestoesClientes = parsed[key];
+            break;
+          }
+        }
+      }
       
       console.log('📋 Sugestões processadas:', sugestoesClientes.length, 'clientes');
     } catch (e) {
-      console.error('❌ Erro ao parsear JSON:', e, 'Conteúdo:', analise);
+      console.error('❌ Erro ao parsear JSON:', e);
+      console.error('📄 Conteúdo bruto:', analise?.substring(0, 500));
       sugestoesClientes = [];
     }
 
