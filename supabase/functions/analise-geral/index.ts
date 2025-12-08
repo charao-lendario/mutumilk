@@ -108,13 +108,26 @@ serve(async (req) => {
       };
     }) || [];
 
+    // Ordenar por prioridade (críticos primeiro, depois em risco, depois ativos)
+    // E limitar a 6 clientes para garantir resposta completa da IA
+    const clientesPrioritarios = clientesDetalhados
+      .sort((a, b) => {
+        const prioridadeA = a.situacao === 'CRÍTICO' ? 0 : a.situacao === 'EM RISCO' ? 1 : 2;
+        const prioridadeB = b.situacao === 'CRÍTICO' ? 0 : b.situacao === 'EM RISCO' ? 1 : 2;
+        if (prioridadeA !== prioridadeB) return prioridadeA - prioridadeB;
+        return b.diasSemComprar - a.diasSemComprar;
+      })
+      .slice(0, 6);
+
+    console.log('🎯 Analisando', clientesPrioritarios.length, 'clientes prioritários');
+
     const contexto = {
       totalClientes: clientes?.length || 0,
       clientesAtivos: clientesAtivos.length,
       clientesInativos: clientesInativos.length,
       clientesEmRisco: clientesEmRisco.length,
       clientesCriticos: clientesCriticos.length,
-      clientes: clientesDetalhados
+      clientes: clientesPrioritarios
     };
 
     const prompt = `Você é um Diretor Comercial Sênior da Mutumilk com 15 anos de experiência em vendas B2B de laticínios. Sua missão é criar estratégias agressivas de vendas que maximizem o faturamento e recuperem clientes.
@@ -202,11 +215,11 @@ RETORNE APENAS O JSON, SEM TEXTO ADICIONAL.`;
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'Você é um Diretor Comercial estratégico que retorna APENAS JSON válido, sem markdown ou texto adicional. Suas análises são profundas, baseadas em dados e focadas em maximizar vendas.' },
+          { role: 'system', content: 'Você é um Diretor Comercial estratégico que retorna APENAS JSON válido e COMPLETO. Limite suas análises a textos concisos (máx 2 linhas por campo). Foque em ações práticas.' },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.8,
-        max_tokens: 4000,
+        temperature: 0.7,
+        max_tokens: 8000,
         response_format: { type: "json_object" }
       }),
     });
