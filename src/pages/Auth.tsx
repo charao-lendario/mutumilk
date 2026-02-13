@@ -141,11 +141,11 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-secondary/5 p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md glass-strong gradient-border">
         <CardHeader className="space-y-4 text-center">
-          <CardTitle className="text-2xl">Sistema de Gestão Comercial</CardTitle>
-          <CardDescription>Gestão Inteligente para Laticínios</CardDescription>
+          <CardTitle className="text-2xl font-bold">MutuMilk</CardTitle>
+          <CardDescription>Gestao Comercial Inteligente</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login" className="w-full">
@@ -227,12 +227,12 @@ export default function Auth() {
             </TabsContent>
           </Tabs>
           
-          <div className="mt-6 pt-4 border-t border-border">
+          <div className="mt-6 pt-4 border-t border-white/[0.06]">
             <div className="text-xs text-muted-foreground space-y-2">
-              <p className="font-semibold text-foreground text-center">Credenciais de Teste:</p>
-              <div className="bg-muted/50 rounded-md p-3 space-y-1">
-                <p><strong>Admin:</strong> admin@laticinio.com / Admin123</p>
-                <p><strong>Vendedor:</strong> vendedor1@laticinio.com / Vend123</p>
+              <p className="font-semibold text-foreground text-center">Credenciais de Teste</p>
+              <div className="bg-white/[0.03] rounded-lg p-3 space-y-1.5 border border-white/[0.06]">
+                <p><span className="text-primary font-medium">Admin:</span> admin@laticinio.com / Admin123</p>
+                <p><span className="text-primary font-medium">Vendedor:</span> vendedor1@laticinio.com / Vend123</p>
               </div>
             </div>
           </div>
