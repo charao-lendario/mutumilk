@@ -273,13 +273,23 @@ export default function ExecutarRota() {
                   </div>
                 ))}
               </div>
-              <Button
-                onClick={() => navigate("/rota")}
-                className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white shadow-lg shadow-sky-500/20"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Voltar para Rota
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <Button
+                  onClick={() => navigate("/rota")}
+                  variant="outline"
+                  className="flex-1 border-white/10 hover:bg-white/[0.06]"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Ver Resumo da Rota
+                </Button>
+                <Button
+                  onClick={() => navigate("/")}
+                  className="flex-1 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white shadow-lg shadow-sky-500/20"
+                >
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Planejar Rota de Amanha
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -341,17 +351,17 @@ export default function ExecutarRota() {
                 : "bg-gradient-to-r from-emerald-500 to-emerald-400"
           }`} />
           <CardHeader className="pb-2">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500/20 to-blue-600/20 flex items-center justify-center">
-                  <span className="text-lg font-bold text-sky-400">{currentVisita.ordem}</span>
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-sky-500/20 to-blue-600/20 flex items-center justify-center shrink-0">
+                  <span className="text-base sm:text-lg font-bold text-sky-400">{currentVisita.ordem}</span>
                 </div>
-                <div>
-                  <CardTitle className="text-lg">{currentVisita.cliente_nome}</CardTitle>
+                <div className="min-w-0">
+                  <CardTitle className="text-base sm:text-lg truncate">{currentVisita.cliente_nome}</CardTitle>
                   <CardDescription className="capitalize">{currentVisita.cliente_tipo}</CardDescription>
                 </div>
               </div>
-              <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${prio.bg} ${prio.color} ${prio.border}`}>
+              <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border shrink-0 ${prio.bg} ${prio.color} ${prio.border}`}>
                 {currentVisita.ai_sugestao.prioridade.replace("_", " ")}
               </span>
             </div>
@@ -391,7 +401,7 @@ export default function ExecutarRota() {
 
             {/* Action Buttons */}
             {!isCurrentConcluida && (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <Button
                   onClick={() => handleAcao("visita")}
                   className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white shadow-lg shadow-emerald-500/20 h-12"
@@ -477,7 +487,7 @@ export default function ExecutarRota() {
 
       {/* Produtos Dialog */}
       <Dialog open={showProdutosDialog} onOpenChange={setShowProdutosDialog}>
-        <DialogContent className="max-w-lg max-h-[85vh]">
+        <DialogContent className="max-w-lg max-h-[85vh] mx-4 sm:mx-auto">
           <DialogHeader>
             <DialogTitle>Selecionar Produtos</DialogTitle>
             <DialogDescription>

@@ -149,7 +149,7 @@ export default function Rota() {
           ))}
         </div>
 
-        {/* Start Button */}
+        {/* Start Button or Completed State */}
         {roteiro && concluidas < totalVisitas && (
           <div className="animate-fade-in-up stagger-5">
             <Button
@@ -157,10 +157,30 @@ export default function Rota() {
               className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white shadow-lg shadow-emerald-500/20 h-12 text-base"
             >
               <Play className="h-5 w-5 mr-2" />
-              Iniciar Execucao
+              {concluidas > 0 ? "Continuar Execucao" : "Iniciar Execucao"}
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </div>
+        )}
+
+        {roteiro && concluidas >= totalVisitas && totalVisitas > 0 && (
+          <Card className="glass overflow-hidden animate-fade-in-up stagger-5">
+            <div className="h-1.5 bg-gradient-to-r from-emerald-500 to-green-500" />
+            <CardContent className="p-6 text-center">
+              <CheckCircle2 className="h-10 w-10 text-emerald-400 mx-auto mb-3" />
+              <h3 className="text-lg font-bold mb-1">Rota de Hoje Finalizada!</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Todas as {totalVisitas} visitas foram concluidas. Prepare sua rota de amanha.
+              </p>
+              <Button
+                onClick={() => navigate("/")}
+                className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white shadow-lg shadow-sky-500/20"
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                Planejar Rota de Amanha
+              </Button>
+            </CardContent>
+          </Card>
         )}
 
         {/* Visit Cards */}
@@ -198,9 +218,9 @@ export default function Rota() {
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h3 className="font-semibold text-sm">
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-sm truncate">
                             {visita.cliente_nome}
                           </h3>
                           <div className="flex items-center gap-2 flex-wrap mt-1">
@@ -209,7 +229,7 @@ export default function Rota() {
                             </span>
                             <span className="text-xs text-muted-foreground flex items-center gap-1">
                               <Clock className="h-3 w-3" />
-                              {diasSemCompra} dias sem compra
+                              {diasSemCompra}d sem compra
                             </span>
                           </div>
                         </div>
