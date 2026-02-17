@@ -1,6 +1,4 @@
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import React from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 
@@ -12,28 +10,6 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ title, subtitle, children, actions }: DashboardLayoutProps) {
-  const { user, isLoading } = useAuth();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!isLoading && !user) {
-      navigate("/auth");
-    }
-  }, [user, isLoading, navigate]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-          <p className="text-sm text-muted-foreground">Carregando...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) return null;
-
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">

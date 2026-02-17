@@ -1,10 +1,11 @@
 import React from "react";
 import {
   LayoutDashboard, LogOut, Users, ShoppingCart,
-  Package, Sparkles, BarChart3, ChevronRight,
+  Package, Sparkles, BarChart3, Map, History,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import logo from "@/assets/mutumilk-logo-circle.png";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
@@ -14,30 +15,52 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
-const mainItems = [
+const vendedorMainItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard, end: true },
+  { title: "Minha Rota", url: "/rota", icon: Map, end: false },
   { title: "Clientes", url: "/clientes", icon: Users, end: true },
   { title: "Pedidos", url: "/pedidos", icon: ShoppingCart, end: true },
-  { title: "Produtos", url: "/produtos", icon: Package, end: true },
 ];
 
-const toolItems = [
+const vendedorToolItems = [
+  { title: "Historico", url: "/historico", icon: History, end: true },
   { title: "Analises IA", url: "/analises", icon: Sparkles, end: true },
-  { title: "Relatorios", url: "/relatorios", icon: BarChart3, end: true },
 ];
+
+const adminMainItems = [
+  { title: "Dashboard", url: "/admin", icon: LayoutDashboard, end: true },
+  { title: "Mapa ao Vivo", url: "/admin/mapa", icon: Map, end: true },
+  { title: "Vendedores", url: "/admin/vendedores", icon: Users, end: false },
+];
+
+const adminToolItems = [
+  { title: "Produtos", url: "/admin/produtos", icon: Package, end: true },
+  { title: "Relatorios", url: "/admin/relatorios", icon: BarChart3, end: true },
+];
+
+type NavItem = { title: string; url: string; icon: React.ElementType; end: boolean };
 
 export function AppSidebar() {
   const { state } = useSidebar();
-  const { user, userRole, signOut } = useAuth();
+  const { user, userRole, isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
   const collapsed = state === "collapsed";
+
+  const mainItems = isAdmin ? adminMainItems : vendedorMainItems;
+  const toolItems = isAdmin ? adminToolItems : vendedorToolItems;
 
   const initials = user?.email
     ? user.email.substring(0, 2).toUpperCase()
     : "MM";
 
-  const displayName = userRole === "admin" ? "Administrador" : "Vendedor";
+  const displayName = user?.full_name || (isAdmin ? "Administrador" : "Vendedor");
 
-  const renderItem = (item: typeof mainItems[0]) => (
+  const handleSignOut = () => {
+    signOut();
+    navigate("/auth");
+  };
+
+  const renderItem = (item: NavItem) => (
     <SidebarMenuItem key={item.title}>
       <SidebarMenuButton asChild>
         <NavLink
@@ -65,7 +88,9 @@ export function AppSidebar() {
           {!collapsed && (
             <div className="flex flex-col">
               <span className="font-bold text-sm tracking-tight">MutuMilk</span>
-              <span className="text-[10px] text-muted-foreground">Gestao Comercial</span>
+              <span className="text-[10px] text-muted-foreground">
+                {isAdmin ? "Painel Admin" : "Representante"}
+              </span>
             </div>
           )}
         </div>
@@ -115,7 +140,7 @@ export function AppSidebar() {
             </div>
           )}
           <Button
-            onClick={signOut}
+            onClick={handleSignOut}
             variant="ghost"
             className="w-full justify-start text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
             size={collapsed ? "sm" : "default"}

@@ -235,3 +235,53 @@
 .recharts-tooltip-item {
   color: hsl(215 20% 65%) !important;
 }
+
+/* Leaflet dark theme */
+.leaflet-container {
+  background: hsl(222 47% 8%) !important;
+}
+
+.leaflet-tile-pane {
+  filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+}
+
+.leaflet-control-zoom a {
+  background: hsl(217 33% 17% / 0.9) !important;
+  color: hsl(210 40% 98%) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: hsl(217 33% 22% / 0.9) !important;
+}
+
+.leaflet-control-attribution {
+  background: hsl(217 33% 17% / 0.8) !important;
+  color: hsl(215 20% 65%) !important;
+  font-size: 10px !important;
+}
+
+.leaflet-control-attribution a {
+  color: hsl(199 89% 48%) !important;
+}
+
+.leaflet-popup-content-wrapper {
+  background: hsl(217 33% 17% / 0.95) !important;
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+  color: hsl(210 40% 98%) !important;
+}
+
+.leaflet-popup-tip {
+  background: hsl(217 33% 17% / 0.95) !important;
+}
+
+.leaflet-popup-close-button {
+  color: hsl(215 20% 65%) !important;
+}
+
+.leaflet-popup-close-button:hover {
+  color: hsl(210 40% 98%) !important;
+}
