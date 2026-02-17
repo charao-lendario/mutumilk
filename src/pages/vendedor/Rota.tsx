@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -45,15 +45,25 @@ const statusVisitaConfig: Record<string, { color: string; bgColor: string; borde
 export default function Rota() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [gerando, setGerando] = useState(false);
   const [roteiroGerado, setRoteiroGerado] = useState(false);
+  const [planejandoAmanha, setPlanejandoAmanha] = useState(
+    () => !!(location.state as Record<string, unknown>)?.gerarAmanha
+  );
 
   const roteiro = useMemo(() => {
     if (!user) return null;
     return getRoteiroByVendedor(user.id);
   }, [user]);
 
-  const temRota = roteiro !== null || roteiroGerado;
+  const rotaConcluida = useMemo(() => {
+    if (!roteiro) return false;
+    const visitas = roteiro.visitas.map((v) => getVisitaComUpdate(v));
+    return visitas.length > 0 && visitas.every((v) => v.status !== "pendente");
+  }, [roteiro]);
+
+  const temRota = (roteiro !== null && !planejandoAmanha) || roteiroGerado;
 
   const visitasAtualizadas = useMemo(() => {
     if (!roteiro) return [];
@@ -75,7 +85,7 @@ export default function Rota() {
 
   if (!temRota) {
     return (
-      <DashboardLayout title="Minha Rota" subtitle="Roteiro inteligente do dia">
+      <DashboardLayout title="Minha Rota" subtitle={planejandoAmanha ? "Planeje o roteiro de amanha" : "Roteiro inteligente do dia"}>
         <div className="max-w-[800px] mx-auto">
           <Card className="glass animate-fade-in-up stagger-1">
             <CardContent className="p-8">
@@ -84,10 +94,14 @@ export default function Rota() {
                   <Sparkles className="h-10 w-10 text-sky-400" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold mb-2">Rota Inteligente com IA</h2>
+                  <h2 className="text-xl font-bold mb-2">
+                    {planejandoAmanha ? "Gerar Rota de Amanha" : "Rota Inteligente com IA"}
+                  </h2>
                   <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-                    Nossa IA analisa sua carteira de clientes, identifica prioridades e cria
-                    um roteiro otimizado para maximizar suas vendas e recuperar clientes em risco.
+                    {planejandoAmanha
+                      ? "A IA vai analisar os resultados de hoje, as justificativas registradas e o historico da sua carteira para gerar o melhor roteiro para amanha."
+                      : "Nossa IA analisa sua carteira de clientes, identifica prioridades e cria um roteiro otimizado para maximizar suas vendas e recuperar clientes em risco."
+                    }
                   </p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-lg mx-auto">
@@ -112,12 +126,12 @@ export default function Rota() {
                   {gerando ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Gerando rota...
+                      {planejandoAmanha ? "Gerando rota de amanha..." : "Gerando rota..."}
                     </>
                   ) : (
                     <>
                       <Sparkles className="h-4 w-4 mr-2" />
-                      Gerar Rota com IA
+                      {planejandoAmanha ? "Gerar Rota de Amanha com IA" : "Gerar Rota com IA"}
                     </>
                   )}
                 </Button>
@@ -173,7 +187,7 @@ export default function Rota() {
                 Todas as {totalVisitas} visitas foram concluidas. Prepare sua rota de amanha.
               </p>
               <Button
-                onClick={() => navigate("/")}
+                onClick={() => setPlanejandoAmanha(true)}
                 className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white shadow-lg shadow-sky-500/20"
               >
                 <Sparkles className="h-4 w-4 mr-2" />

@@ -283,7 +283,7 @@ export default function ExecutarRota() {
                   Ver Resumo da Rota
                 </Button>
                 <Button
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate("/rota", { state: { gerarAmanha: true } })}
                   className="flex-1 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white shadow-lg shadow-sky-500/20"
                 >
                   <Sparkles className="h-4 w-4 mr-2" />
