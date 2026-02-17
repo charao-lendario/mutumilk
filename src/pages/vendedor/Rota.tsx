@@ -3,6 +3,13 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   MapPin,
   Navigation,
@@ -19,14 +26,27 @@ import {
   ChevronRight,
   Zap,
   Route,
+  Phone,
+  Building2,
+  FileText,
+  ShoppingCart,
+  TrendingUp,
+  Calendar,
+  Package,
+  X,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   getRoteiroByVendedor,
   getDiasSemCompra,
+  getStatusCliente,
   getClienteById,
+  getPedidosByCliente,
+  getProdutosEmPromocao,
   formatCurrency,
   type MockRoteiro,
+  type MockVisita,
+  type MockCliente,
 } from "@/data/mock";
 import { getVisitaComUpdate } from "@/stores/mockStore";
 
@@ -75,12 +95,33 @@ export default function Rota() {
   const valorEstimado = visitasAtualizadas.reduce((s, v) => s + v.ai_sugestao.valorEstimado, 0);
   const percentConcluido = totalVisitas > 0 ? Math.round((concluidas / totalVisitas) * 100) : 0;
 
+  const [selectedVisita, setSelectedVisita] = useState<string | null>(null);
+
+  const selectedData = useMemo(() => {
+    if (!selectedVisita) return null;
+    const visita = visitasAtualizadas.find((v) => v.id === selectedVisita);
+    if (!visita) return null;
+    const cliente = getClienteById(visita.cliente_id);
+    if (!cliente) return null;
+    const status = getStatusCliente(cliente);
+    const dias = getDiasSemCompra(cliente);
+    const pedidos = getPedidosByCliente(cliente.id).slice(0, 5);
+    const promocoes = getProdutosEmPromocao().slice(0, 4);
+    return { visita, cliente, status, dias, pedidos, promocoes };
+  }, [selectedVisita, visitasAtualizadas]);
+
   const handleGerarRota = () => {
     setGerando(true);
     setTimeout(() => {
       setGerando(false);
       setRoteiroGerado(true);
     }, 2000);
+  };
+
+  const statusConfig: Record<string, { color: string; bg: string; border: string; label: string }> = {
+    ativo: { color: "text-emerald-400", bg: "bg-emerald-400/10", border: "border-emerald-400/20", label: "Ativo" },
+    risco: { color: "text-amber-400", bg: "bg-amber-400/10", border: "border-amber-400/20", label: "Em Risco" },
+    critico: { color: "text-red-400", bg: "bg-red-400/10", border: "border-red-400/20", label: "Critico" },
   };
 
   if (!temRota) {
@@ -208,10 +249,11 @@ export default function Rota() {
             return (
               <Card
                 key={visita.id}
-                className={`glass hover:border-white/20 transition-all duration-300 animate-fade-in-up ${
+                className={`glass hover:border-white/20 transition-all duration-300 animate-fade-in-up cursor-pointer active:scale-[0.99] ${
                   visita.status !== "pendente" ? "opacity-70" : ""
                 }`}
                 style={{ animationDelay: `${0.3 + i * 0.05}s` }}
+                onClick={() => setSelectedVisita(visita.id)}
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-4">
@@ -279,6 +321,192 @@ export default function Rota() {
           })}
         </div>
       </div>
+
+      {/* Client Detail Dialog */}
+      <Dialog open={!!selectedVisita} onOpenChange={(open) => !open && setSelectedVisita(null)}>
+        <DialogContent className="max-w-lg max-h-[90vh] p-0 gap-0 mx-4 sm:mx-auto overflow-hidden">
+          {selectedData && (() => {
+            const { visita, cliente, status, dias, pedidos, promocoes } = selectedData;
+            const prio = prioridadeConfig[visita.ai_sugestao.prioridade];
+            const sc = statusConfig[status];
+            return (
+              <>
+                {/* Header gradient bar */}
+                <div className={`h-1.5 ${
+                  status === "critico" ? "bg-gradient-to-r from-red-500 to-red-400"
+                  : status === "risco" ? "bg-gradient-to-r from-amber-500 to-amber-400"
+                  : "bg-gradient-to-r from-emerald-500 to-emerald-400"
+                }`} />
+
+                <ScrollArea className="max-h-[calc(90vh-2rem)]">
+                  <div className="p-5 space-y-5">
+                    {/* Client Header */}
+                    <div className="flex items-start gap-3">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${sc.bg} ${sc.border} border`}>
+                        <Building2 className={`h-5 w-5 ${sc.color}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h2 className="text-lg font-bold truncate">{cliente.nome}</h2>
+                        <div className="flex items-center gap-2 flex-wrap mt-1">
+                          <span className="text-xs px-2 py-0.5 rounded-md bg-white/[0.05] text-muted-foreground capitalize">
+                            {cliente.tipo}
+                          </span>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-bold border ${sc.bg} ${sc.color} ${sc.border}`}>
+                            {sc.label}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Info Grid */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Clock className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Dias sem compra</span>
+                        </div>
+                        <p className={`text-lg font-bold ${dias > 60 ? "text-red-400" : dias > 30 ? "text-amber-400" : "text-emerald-400"}`}>
+                          {dias === 999 ? "Nunca" : `${dias} dias`}
+                        </p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <DollarSign className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Ticket medio</span>
+                        </div>
+                        <p className="text-lg font-bold text-sky-400">{formatCurrency(cliente.ticket_medio)}</p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <Phone className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Contato</span>
+                        </div>
+                        <p className="text-sm font-medium">{cliente.contato}</p>
+                      </div>
+                      <div className="p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <FileText className="h-3 w-3 text-muted-foreground" />
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">CNPJ</span>
+                        </div>
+                        <p className="text-sm font-medium">{cliente.cnpj}</p>
+                      </div>
+                    </div>
+
+                    {/* Address */}
+                    <div className="flex items-start gap-2 p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+                      <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+                      <p className="text-sm text-muted-foreground">{cliente.endereco}</p>
+                    </div>
+
+                    {/* AI Recommendation */}
+                    <div className="p-4 rounded-xl bg-gradient-to-br from-sky-500/5 to-blue-600/5 border border-sky-500/10">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Sparkles className="h-4 w-4 text-sky-400" />
+                        <span className="text-sm font-semibold text-sky-400">Orientacao da IA</span>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div>
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Por que visitar</span>
+                          <p className="text-sm text-muted-foreground leading-relaxed mt-0.5">
+                            {visita.ai_sugestao.motivoVisita}
+                          </p>
+                        </div>
+
+                        <div className="border-t border-white/[0.06] pt-3">
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Como abordar</span>
+                          <p className="text-sm leading-relaxed mt-0.5">
+                            {visita.ai_sugestao.abordagem}
+                          </p>
+                        </div>
+
+                        <div className="border-t border-white/[0.06] pt-3">
+                          <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Valor estimado</span>
+                          <p className="text-xl font-bold text-emerald-400 mt-0.5">
+                            {formatCurrency(visita.ai_sugestao.valorEstimado)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Products to Offer */}
+                    {promocoes.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Package className="h-4 w-4 text-emerald-400" />
+                          <span className="text-sm font-semibold">Oferte em Promocao</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          {promocoes.map((p) => (
+                            <div key={p.id} className="p-2.5 rounded-lg bg-emerald-400/5 border border-emerald-400/10">
+                              <p className="text-xs font-medium truncate">{p.nome}</p>
+                              <div className="flex items-center gap-1.5 mt-1">
+                                <span className="text-xs font-bold text-emerald-400">{formatCurrency(p.preco_atual)}</span>
+                                {p.preco_anterior !== p.preco_atual && (
+                                  <span className="text-[10px] text-muted-foreground line-through">{formatCurrency(p.preco_anterior)}</span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Recent Orders */}
+                    {pedidos.length > 0 && (
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <ShoppingCart className="h-4 w-4 text-sky-400" />
+                          <span className="text-sm font-semibold">Ultimos Pedidos</span>
+                        </div>
+                        <div className="space-y-1.5">
+                          {pedidos.map((ped) => (
+                            <div key={ped.id} className="flex items-center justify-between p-2.5 rounded-lg bg-white/[0.02] border border-white/[0.06]">
+                              <div className="min-w-0">
+                                <p className="text-xs text-muted-foreground">
+                                  {new Date(ped.data_pedido).toLocaleDateString("pt-BR")}
+                                </p>
+                                <p className="text-[10px] text-muted-foreground">
+                                  {ped.itens.length} {ped.itens.length === 1 ? "item" : "itens"}
+                                </p>
+                              </div>
+                              <span className={`text-sm font-bold ${ped.status === "concluido" ? "text-emerald-400" : "text-muted-foreground"}`}>
+                                {formatCurrency(ped.valor_total)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {pedidos.length === 0 && (
+                      <div className="p-4 rounded-xl bg-red-400/5 border border-red-400/10 text-center">
+                        <AlertTriangle className="h-5 w-5 text-red-400 mx-auto mb-2" />
+                        <p className="text-xs text-red-400 font-semibold">Nenhum pedido registrado</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">Cliente nunca comprou ou sem historico</p>
+                      </div>
+                    )}
+
+                    {/* Action Button */}
+                    {roteiro && visita.status === "pendente" && (
+                      <Button
+                        onClick={() => {
+                          setSelectedVisita(null);
+                          navigate(`/rota/${roteiro.id}/executar`);
+                        }}
+                        className="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white shadow-lg shadow-emerald-500/20 h-11"
+                      >
+                        <Play className="h-4 w-4 mr-2" />
+                        Iniciar Visita
+                      </Button>
+                    )}
+                  </div>
+                </ScrollArea>
+              </>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 }
