@@ -84,7 +84,7 @@ export default function Vendedores() {
     <DashboardLayout title="Vendedores" subtitle="Equipe de representantes">
       <div className="space-y-6 max-w-[1400px] mx-auto">
         {/* Summary strip */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           {vendedoresData.slice(0, 3).map((v, i) => (
             <Card
               key={v.id}
@@ -109,6 +109,7 @@ export default function Vendedores() {
         <Card className="glass animate-fade-in-up stagger-4">
           <CardContent className="p-0">
             <ScrollArea className="h-[500px]">
+              <div className="min-w-[640px]">
               <Table>
                 <TableHeader>
                   <TableRow className="border-white/[0.06] hover:bg-transparent">
@@ -181,6 +182,7 @@ export default function Vendedores() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             </ScrollArea>
           </CardContent>
         </Card>
