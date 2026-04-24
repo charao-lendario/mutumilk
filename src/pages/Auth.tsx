@@ -85,7 +85,7 @@ export default function Auth() {
               <Button
                 onClick={() => handleQuickLogin("admin@laticinio.com", "Admin123", "admin")}
                 disabled={isLoading}
-                className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg shadow-violet-500/20"
+                className="w-full bg-gradient-to-r from-blue-900 to-blue-950 hover:from-blue-800 hover:to-blue-900 text-white shadow-lg shadow-blue-900/20"
                 size="lg"
               >
                 <Shield className="h-4 w-4 mr-2" />
@@ -94,8 +94,7 @@ export default function Auth() {
               <Button
                 onClick={() => handleQuickLogin("vendedor1@laticinio.com", "Vend123", "vendedor")}
                 disabled={isLoading}
-                variant="outline"
-                className="w-full border-sky-500/30 text-sky-400 hover:bg-sky-500/10 hover:border-sky-500/50"
+                className="w-full bg-gradient-to-r from-red-700 to-red-800 hover:from-red-600 hover:to-red-700 text-white shadow-lg shadow-red-700/20"
                 size="lg"
               >
                 <User className="h-4 w-4 mr-2" />
@@ -105,7 +104,7 @@ export default function Auth() {
                 onClick={() => handleQuickLogin("vendedor2@laticinio.com", "Vend123", "vendedor")}
                 disabled={isLoading}
                 variant="outline"
-                className="w-full border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/50"
+                className="w-full border-red-700/40 text-red-700 hover:bg-red-700/10 hover:border-red-700/60"
                 size="lg"
               >
                 <Users className="h-4 w-4 mr-2" />
@@ -147,7 +146,11 @@ export default function Auth() {
                 required
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-blue-900 to-blue-950 hover:from-blue-800 hover:to-blue-900 text-white shadow-lg shadow-blue-900/20"
+              disabled={isLoading}
+            >
               {isLoading ? "Entrando..." : "Entrar"}
             </Button>
           </form>

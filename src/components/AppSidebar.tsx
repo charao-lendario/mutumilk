@@ -66,10 +66,10 @@ export function AppSidebar() {
         <NavLink
           to={item.url}
           end={item.end}
-          className="group flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-white/[0.06] transition-all duration-200"
-          activeClassName="bg-primary/10 text-primary border border-primary/20"
+          className="group flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-slate-200/70 transition-all duration-200"
+          activeClassName="bg-sidebar-primary/10 text-sidebar-primary border border-sidebar-primary/20"
         >
-          <item.icon className="h-4 w-4 shrink-0 group-hover:text-primary transition-colors" />
+          <item.icon className="h-4 w-4 shrink-0 group-hover:text-sidebar-primary transition-colors" />
           {!collapsed && <span>{item.title}</span>}
         </NavLink>
       </SidebarMenuButton>
@@ -78,7 +78,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar className={collapsed ? "w-14" : "w-60"} collapsible="icon">
-      <SidebarHeader className="border-b border-white/[0.06] p-4">
+      <SidebarHeader className="border-b border-slate-200 p-4">
         <div className="flex items-center justify-center">
           <img
             src={logo}
@@ -102,7 +102,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {!collapsed && <Separator className="my-3 bg-white/[0.06]" />}
+        {!collapsed && <Separator className="my-3 bg-slate-200" />}
 
         <SidebarGroup>
           {!collapsed && (
@@ -118,11 +118,11 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-white/[0.06] p-3">
+      <SidebarFooter className="border-t border-slate-200 p-3">
         <div className="space-y-2">
           {!collapsed && user && (
-            <div className="flex items-center gap-3 p-2 rounded-lg bg-white/[0.03]">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-sky-500 to-violet-500 flex items-center justify-center shrink-0 shadow-lg shadow-sky-500/20">
+            <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-100">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-700 to-blue-900 flex items-center justify-center shrink-0 shadow-lg shadow-red-700/20">
                 <span className="text-xs font-bold text-white">{initials}</span>
               </div>
               <div className="flex-1 min-w-0">
