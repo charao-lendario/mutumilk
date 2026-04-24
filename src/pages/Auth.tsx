@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/
 import { toast } from "sonner";
 import { SparklesCore } from "@/components/ui/sparkles";
 import { Shield, User, Users } from "lucide-react";
-import logo from "@/assets/mutumilk-logo-circle.png";
+import logo from "@/assets/mutumilk_logo.png";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -52,7 +52,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
       <div className="w-full absolute inset-0 h-screen">
         <SparklesCore
           id="tsparticlesfullpage"
@@ -72,7 +72,7 @@ export default function Auth() {
             <img
               src={logo}
               alt="MutuMilk"
-              className="h-24 w-24 object-contain"
+              className="h-24 w-auto object-contain"
             />
           </div>
           <CardDescription>Gestao Comercial Inteligente</CardDescription>

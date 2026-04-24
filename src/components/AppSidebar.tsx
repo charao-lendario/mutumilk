@@ -6,7 +6,7 @@ import {
 import { NavLink } from "@/components/NavLink";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import logo from "@/assets/mutumilk-logo-circle.png";
+import logo from "@/assets/mutumilk_logo.png";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
@@ -83,7 +83,7 @@ export function AppSidebar() {
           <img
             src={logo}
             alt="MutuMilk"
-            className={`object-contain transition-all duration-300 ${collapsed ? 'h-8 w-8' : 'h-14 w-14'}`}
+            className={`object-contain transition-all duration-300 ${collapsed ? 'h-8 w-auto' : 'h-12 w-auto'}`}
           />
         </div>
       </SidebarHeader>
