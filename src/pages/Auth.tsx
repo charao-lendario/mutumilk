@@ -52,7 +52,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-white p-4 relative overflow-hidden">
       <div className="w-full absolute inset-0 h-screen">
         <SparklesCore
           id="tsparticlesfullpage"
@@ -66,7 +66,7 @@ export default function Auth() {
         />
       </div>
 
-      <Card className="w-full max-w-md glass-strong gradient-border relative z-10">
+      <Card className="w-full max-w-md bg-white border border-slate-200 shadow-xl relative z-10">
         <CardHeader className="space-y-4 text-center">
           <div className="flex justify-center">
             <img
@@ -116,10 +116,10 @@ export default function Auth() {
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/[0.06]" />
+              <div className="w-full border-t border-slate-200" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card/80 px-2 text-muted-foreground">ou entre manualmente</span>
+              <span className="bg-white px-2 text-muted-foreground">ou entre manualmente</span>
             </div>
           </div>
 
