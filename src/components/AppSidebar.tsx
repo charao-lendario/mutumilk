@@ -79,20 +79,12 @@ export function AppSidebar() {
   return (
     <Sidebar className={collapsed ? "w-14" : "w-60"} collapsible="icon">
       <SidebarHeader className="border-b border-white/[0.06] p-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center justify-center">
           <img
             src={logo}
-            alt="Mutumilk"
-            className={`object-contain transition-all duration-300 ${collapsed ? 'h-8 w-8' : 'h-10 w-10'}`}
+            alt="MutuMilk"
+            className={`object-contain transition-all duration-300 ${collapsed ? 'h-8 w-8' : 'h-14 w-14'}`}
           />
-          {!collapsed && (
-            <div className="flex flex-col">
-              <span className="font-bold text-sm tracking-tight">MutuMilk</span>
-              <span className="text-[10px] text-muted-foreground">
-                {isAdmin ? "Painel Admin" : "Representante"}
-              </span>
-            </div>
-          )}
         </div>
       </SidebarHeader>
 

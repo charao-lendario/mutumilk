@@ -4,10 +4,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
 import { toast } from "sonner";
 import { SparklesCore } from "@/components/ui/sparkles";
 import { Shield, User, Users } from "lucide-react";
+import logo from "@/assets/mutumilk-logo-circle.png";
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -67,7 +68,13 @@ export default function Auth() {
 
       <Card className="w-full max-w-md glass-strong gradient-border relative z-10">
         <CardHeader className="space-y-4 text-center">
-          <CardTitle className="text-3xl font-bold text-gradient">MutuMilk</CardTitle>
+          <div className="flex justify-center">
+            <img
+              src={logo}
+              alt="MutuMilk"
+              className="h-24 w-24 object-contain"
+            />
+          </div>
           <CardDescription>Gestao Comercial Inteligente</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
